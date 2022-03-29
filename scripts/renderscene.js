@@ -21,6 +21,7 @@ function init() {
 
     ctx = view.getContext('2d');
 
+    /*
     // initial scene... feel free to change this
     scene = {
         view: {
@@ -57,6 +58,44 @@ function init() {
                 matrix: new Matrix(4, 4)
             }
         ]
+        */
+
+        scene = {
+            view: {
+                type: 'perspective',
+                prp: Vector3(0, 10, -5),
+                srp: Vector3(20, 15, -40),
+                vup: Vector3(1, 1, 0),
+                clip: [-12, 6, -12, 6, 10, 100]
+            },
+            models: [
+                {
+                    type: 'generic',
+                    vertices: [
+                        Vector4( 0,  0, -30, 1),
+                        Vector4(20,  0, -30, 1),
+                        Vector4(20, 12, -30, 1),
+                        Vector4(10, 20, -30, 1),
+                        Vector4( 0, 12, -30, 1),
+                        Vector4( 0,  0, -60, 1),
+                        Vector4(20,  0, -60, 1),
+                        Vector4(20, 12, -60, 1),
+                        Vector4(10, 20, -60, 1),
+                        Vector4( 0, 12, -60, 1)
+                    ],
+                    edges: [
+                        [0, 1, 2, 3, 4, 0],
+                        [5, 6, 7, 8, 9, 5],
+                        [0, 5],
+                        [1, 6],
+                        [2, 7],
+                        [3, 8],
+                        [4, 9]
+                    ],
+                    matrix: new Matrix(4, 4)
+                }
+            ]
+
     };
 
     // event handler for pressing arrow keys
@@ -89,10 +128,41 @@ function drawScene() {
     
     // TODO: implement drawing here!
     // For each model, for each edge
-    //  * transform to canonical view volume
+    //  * transform to canonical view volume  - - - - - Believe this is completed for perspective
     //  * clip in 3D
     //  * project to 2D
     //  * draw line
+
+    if(scene.view.type = 'perspective'){
+        //transform
+        let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+        //clip
+
+
+        //project
+        //          NEED TO REDO THIS, DID IT OUT OF ORDER, NEED TO TRANFORM THE POINTS SEPARATELY, THEN CLIP, THEN PROJECT
+        //          Tried to do this all in one go but that is not the way
+        let m = new Matrix(4, 4);
+        let vmat = new Matrix(4, 4);
+        vmat.values = [view.width/2, 0, 0, view.width/2, 0, view.height/2, 0, view.height/2, 0, 0, 1, 0, 0, 0, 0, 1];
+        m.values = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 0];
+        let final = m.mult(transformmat);
+        scene.models[0].edges.forEach(element => {
+            //console.log(element);
+            for(let i = 4; i<element.length-1; i++){
+                let point1 = final.mult(scene.models[0].vertices[element[i]]);
+                let point2 = final.mult(scene.models[0].vertices[element[i+1]]);
+                point1 = point1.mult(vmat);
+                point2 = point2.mult(vmat);
+                console.log(point1);
+                //draw line
+                drawLine((point1.data[0]/point1.data[3]), (point1.data[1]/point1.data[3]), (point2.data[0]/point2.data[3]), (point2.data[1]/point2.data[3]));
+            }        
+            drawLine(200, 300, 200, 600)    
+        });
+        
+    }
+
 }
 
 // Get outcode for vertex (parallel view volume)
