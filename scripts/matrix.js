@@ -15,7 +15,7 @@ class Matrix {
 
     set values(v) {
         var i, j, idx;
-        // v is already a 2d array with dims equal to rows and columns
+        // v is already a 2d array with dims equal to rows and columns //
         if (v instanceof Array && v.length === this.rows && 
             v[0] instanceof Array && v[0].length === this.columns) {
             this.data = v;
