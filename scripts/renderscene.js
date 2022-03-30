@@ -21,7 +21,7 @@ function init() {
 
     ctx = view.getContext('2d');
 
-    /*
+    
     // initial scene... feel free to change this
     scene = {
         view: {
@@ -58,8 +58,8 @@ function init() {
                 matrix: new Matrix(4, 4)
             }
         ]
-        */
-
+        
+        /*
         scene = {
             view: {
                 type: 'perspective',
@@ -95,8 +95,9 @@ function init() {
                     matrix: new Matrix(4, 4)
                 }
             ]
-
+            */
     };
+    
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
@@ -161,8 +162,7 @@ function drawScene() {
                 };
                 let newline = clipLinePerspective(line, z_min);
                 if(newline != null){
-                    newvertices[i] = Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].w);
-                    newvertices[i+1] = Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].w); 
+                   //project and then draw inside right here 
                 }
             }
         });
@@ -176,7 +176,6 @@ function drawScene() {
 
         for(let i = 0; i<newvertices.length; i++){
             newvertices[i] = mat4x4MPer().mult(newvertices[i])
-            newvertices[i] = translate11.mult(newvertices[i]); 
             newvertices[i] = vmat.mult(newvertices[i]);
             newvertices[i].data[0] =  [newvertices[i].data[0]/newvertices[i].data[3]];
             newvertices[i].data[1] =  [newvertices[i].data[1]/newvertices[i].data[3]];
