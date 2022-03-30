@@ -3,12 +3,12 @@ let ctx;
 let scene;
 let start_time;
 
-const LEFT =   32; // binary 100000
-const RIGHT =  16; // binary 010000
+const LEFT = 32; // binary 100000
+const RIGHT = 16; // binary 010000
 const BOTTOM = 8;  // binary 001000
-const TOP =    4;  // binary 000100
-const FAR =    2;  // binary 000010
-const NEAR =   1;  // binary 000001
+const TOP = 4;  // binary 000100
+const FAR = 2;  // binary 000010
+const NEAR = 1;  // binary 000001
 const FLOAT_EPSILON = 0.000001;
 
 // Initialization function - called when web page loads
@@ -21,7 +21,7 @@ function init() {
 
     ctx = view.getContext('2d');
 
-    
+
     // initial scene... feel free to change this
     scene = {
         view: {
@@ -35,16 +35,16 @@ function init() {
             {
                 type: 'generic',
                 vertices: [
-                    Vector4( 0,  0, -30, 1),
-                    Vector4(20,  0, -30, 1),
+                    Vector4(0, 0, -30, 1),
+                    Vector4(20, 0, -30, 1),
                     Vector4(20, 12, -30, 1),
                     Vector4(10, 20, -30, 1),
-                    Vector4( 0, 12, -30, 1),
-                    Vector4( 0,  0, -60, 1),
-                    Vector4(20,  0, -60, 1),
+                    Vector4(0, 12, -30, 1),
+                    Vector4(0, 0, -60, 1),
+                    Vector4(20, 0, -60, 1),
                     Vector4(20, 12, -60, 1),
                     Vector4(10, 20, -60, 1),
-                    Vector4( 0, 12, -60, 1)
+                    Vector4(0, 12, -60, 1)
                 ],
                 edges: [
                     [0, 1, 2, 3, 4, 0],
@@ -58,7 +58,7 @@ function init() {
                 matrix: new Matrix(4, 4)
             }
         ]
-        
+
         /*
         scene = {
             view: {
@@ -97,11 +97,11 @@ function init() {
             ]
             */
     };
-    
+
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
-    
+
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
     window.requestAnimationFrame(animate);
@@ -111,7 +111,7 @@ function init() {
 function animate(timestamp) {
     // step 1: calculate time (time since start)
     let time = timestamp - start_time;
-    
+
     // step 2: transform models based on time
     // TODO: implement this!
 
@@ -126,7 +126,7 @@ function animate(timestamp) {
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
     console.log(scene);
-    
+
     // TODO: implement drawing here!
     // For each model, for each edge
     //  * transform to canonical view volume  - - - - - Believe this is completed for perspective
@@ -134,61 +134,82 @@ function drawScene() {
     //  * project to 2D
     //  * draw line
 
-    if(scene.view.type = 'perspective'){
+    if (scene.view.type = 'perspective') {
         //transform
         let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
         let newvertices = scene.models[0].vertices;
-        for(let i = 0; i<newvertices.length; i++){
+        for (let i = 0; i < newvertices.length; i++) {
             newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
             //console.log(newvertices[i]);
         };
-        
+
         //clip
-        let z_min = scene.view.clip[4]/scene.view.clip[5];
+        let z_min = scene.view.clip[4] / scene.view.clip[5];
 
         scene.models[0].edges.forEach(element => {
-            for(let i = 0; i<element.length-1; i++){
+            for (let i = 0; i < element.length - 1; i++) {
                 let line = {
                     pt0: {
-                        x: newvertices[i].x, 
+                        x: newvertices[i].x,
                         y: newvertices[i].y,
                         z: newvertices[i].z,
                     },
                     pt1: {
-                        x: newvertices[i+1].x, 
-                        y: newvertices[i+1].y,
-                        z: newvertices[i+1].z,
+                        x: newvertices[i + 1].x,
+                        y: newvertices[i + 1].y,
+                        z: newvertices[i + 1].z,
                     }
                 };
                 let newline = clipLinePerspective(line, z_min);
-                if(newline != null){
-                   //project and then draw inside right here 
+                if (newline != null) {
+                    //project and then draw inside right here 
+                    
+                    //Projection code from previous lines place here for the meantime
+                    let vmat = new Matrix(4, 4);
+                    vmat.values = [[view.width / 2, 0, 0, view.width / 2],
+                    [0, view.height / 2, 0, view.height / 2],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]];
+
+                    
+                    newvertices[i] = mat4x4MPer().mult(newvertices[i])
+                    newvertices[i] = vmat.mult(newvertices[i]);
+                    newvertices[i].data[0] = [newvertices[i].data[0] / newvertices[i].data[3]];
+                    newvertices[i].data[1] = [newvertices[i].data[1] / newvertices[i].data[3]];
+
+                    //draw line  
+                    point1 = newvertices[element[i]];
+                    point2 = newvertices[element[i + 1]];
+                    drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
+                    
                 }
             }
         });
-
-
-        //project
-        let vmat = new Matrix(4, 4);
-        vmat.values = [view.width/2, 0, 0, view.width/2, 0, view.height/2, 0, view.height/2, 0, 0, 1, 0, 0, 0, 0, 1];
-
-        for(let i = 0; i<newvertices.length; i++){
-            newvertices[i] = mat4x4MPer().mult(newvertices[i])
-            newvertices[i] = vmat.mult(newvertices[i]);
-            newvertices[i].data[0] =  [newvertices[i].data[0]/newvertices[i].data[3]];
-            newvertices[i].data[1] =  [newvertices[i].data[1]/newvertices[i].data[3]];
-        }
-
-        //draw line
-        scene.models[0].edges.forEach(element => {
-            for(let i = 0; i<element.length-1; i++){
-                point1 = newvertices[element[i]];
-                point2 = newvertices[element[i+1]];
-                drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
-            }           
-        });
-        
     }
+
+
+        // //project
+        // let vmat = new Matrix(4, 4);
+        // vmat.values = [[view.width / 2, 0, 0, view.width / 2],
+        // [0, view.height / 2, 0, view.height / 2],
+        // [0, 0, 1, 0],
+        // [0, 0, 0, 1]];
+
+        // for (let i = 0; i < newvertices.length; i++) {
+        //     newvertices[i] = mat4x4MPer().mult(newvertices[i])
+        //     newvertices[i] = vmat.mult(newvertices[i]);
+        //     newvertices[i].data[0] = [newvertices[i].data[0] / newvertices[i].data[3]];
+        //     newvertices[i].data[1] = [newvertices[i].data[1] / newvertices[i].data[3]];
+        // }
+
+        // //draw line
+        // scene.models[0].edges.forEach(element => {
+        //     for (let i = 0; i < element.length - 1; i++) {
+        //         point1 = newvertices[element[i]];
+        //         point2 = newvertices[element[i + 1]];
+        //         drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
+        //     }
+        // });
 
 }
 
@@ -243,98 +264,98 @@ function outcodePerspective(vertex, z_min) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLineParallel(line) {
     let result = null;
-    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
+    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodeParallel(p0);
     let out1 = outcodeParallel(p1);
-    
+
     // TODO: implement clipping here!
-    
+
     return result;
 }
 
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLinePerspective(line, z_min) {
     let result = null;
-    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
+    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
-    
-    //trivial deny: check if it is outside of view plane, if it is not 0, don't draw
-    if(out0 & out1 == 0){
+
+    //trivial deny: check if it is outside of view plane, if both are 0, just draw the line
+    if (out0 & out1 == 0) {
         result = line;
-        //loop until trivial accept
-        while(out0 != 0 && out1 !=0){
+    }
+    //loop until trivial accept
+    else {
+        while (out0 != 0 && out1 != 0) {
             //check for first point being outside
             let dx = p0.x - p1.x;
             let dy = p0.y - p1.y;
             let dz = p0.z - p1.z;
-            if(out0 != 0){
-                if(out0 & LEFT){
-                    let t = (-p0.x + p0.z)/(dx-dz);
-                    p0.x = ((1-t)*p0.x) + (t*p1.x);
+            if (out0 != 0) {
+                if (out0 & LEFT) {
+                    let t = (-p0.x + p0.z) / (dx - dz);
+                    p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 }
-                else if(out0 & RIGHT){
-                    let t = (p0.x + p0.z)/(-dx-dz);
-                    p0.x = ((1-t)*p0.x) + (t*p1.x);
+                else if (out0 & RIGHT) {
+                    let t = (p0.x + p0.z) / (-dx - dz);
+                    p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 }
-                else if(out0 & BOTTOM){
-                    let t = (-p0.y + p0.z)/(dy-dz);
-                    p0.y = ((1-t)*p0.y) + (t*p1.y);
+                else if (out0 & BOTTOM) {
+                    let t = (-p0.y + p0.z) / (dy - dz);
+                    p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 }
-                else if(out0 & TOP){
-                    let t = (p0.y + p0.z)/(-dy-dz);
-                    p0.y = ((1-t)*p0.y) + (t*p1.y);
+                else if (out0 & TOP) {
+                    let t = (p0.y + p0.z) / (-dy - dz);
+                    p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 }
-                else if(out0 & FAR){
-                    let t = (-p0.z - 1)/(dz);
-                    p0.z = ((1-t)*p0.z) + (t*p1.z);
+                else if (out0 & FAR) {
+                    let t = (-p0.z - 1) / (dz);
+                    p0.z = ((1 - t) * p0.z) + (t * p1.z);
                 }
-                else{ // NEAR
-                    let t = (p0.z - z_min)/(-dz);
-                    p0.z = ((1-t)*p0.z) + (t*p1.z);
+                else { // NEAR
+                    let t = (p0.z - z_min) / (-dz);
+                    p0.z = ((1 - t) * p0.z) + (t * p1.z);
                 }
                 out0 = outcodePerspective(p0, z_min);
             }
             //second point is not inside
-            else{
-                if(out1 & LEFT){
-                    let t = (-p1.x + p1.z)/(dx-dz);
-                    p1.x = ((1-t)*p1.x) + (t*p0.x);
+            else {
+                if (out1 & LEFT) {
+                    let t = (-p1.x + p1.z) / (dx - dz);
+                    p1.x = ((1 - t) * p1.x) + (t * p0.x);
                 }
-                else if(out1 & RIGHT){
-                    let t = (p1.x + p1.z)/(-dx-dz);
-                    p1.x = ((1-t)*p1.x) + (t*p0.x);
+                else if (out1 & RIGHT) {
+                    let t = (p1.x + p1.z) / (-dx - dz);
+                    p1.x = ((1 - t) * p1.x) + (t * p0.x);
                 }
-                else if(out1 & BOTTOM){
-                    let t = (-p1.y + p1.z)/(dy-dz);
-                    p1.y = ((1-t)*p1.y) + (t*p0.y);
+                else if (out1 & BOTTOM) {
+                    let t = (-p1.y + p1.z) / (dy - dz);
+                    p1.y = ((1 - t) * p1.y) + (t * p0.y);
                 }
-                else if(out1 & TOP){
-                    let t = (p1.y + p1.z)/(-dy-dz);
-                    p1.y = ((1-t)*p1.y) + (t*p0.y);
+                else if (out1 & TOP) {
+                    let t = (p1.y + p1.z) / (-dy - dz);
+                    p1.y = ((1 - t) * p1.y) + (t * p0.y);
                 }
-                else if(out1 & FAR){
-                    let t = (-p1.z - 1)/(dz);
-                    p1.z = ((1-t)*p1.z) + (t*p0.z);
+                else if (out1 & FAR) {
+                    let t = (-p1.z - 1) / (dz);
+                    p1.z = ((1 - t) * p1.z) + (t * p0.z);
                 }
-                else{ // NEAR
-                    let t = (p1.z - z_min)/(-dz);
-                    p1.z = ((1-t)*p1.z) + (t*p0.z);
+                else { // NEAR
+                    let t = (p1.z - z_min) / (-dz);
+                    p1.z = ((1 - t) * p1.z) + (t * p0.z);
                 }
                 out1 = outcodePerspective(p1, z_min);
             }
         }
-        result.pt0 = p0;
-        result.pt1 = p1;
     }
+    result.pt0 = p0;
+    result.pt1 = p1;
 
-    
-    
-    
     return result;
 }
+
 
 // Called when user presses a key on the keyboard down 
 function onKeyDown(event) {
@@ -381,16 +402,16 @@ function loadNewScene() {
             if (scene.models[i].type === 'generic') {
                 for (let j = 0; j < scene.models[i].vertices.length; j++) {
                     scene.models[i].vertices[j] = Vector4(scene.models[i].vertices[j][0],
-                                                          scene.models[i].vertices[j][1],
-                                                          scene.models[i].vertices[j][2],
-                                                          1);
+                        scene.models[i].vertices[j][1],
+                        scene.models[i].vertices[j][2],
+                        1);
                 }
             }
             else {
                 scene.models[i].center = Vector4(scene.models[i].center[0],
-                                                 scene.models[i].center[1],
-                                                 scene.models[i].center[2],
-                                                 1);
+                    scene.models[i].center[1],
+                    scene.models[i].center[2],
+                    1);
             }
             scene.models[i].matrix = new Matrix(4, 4);
         }
