@@ -136,29 +136,59 @@ function drawScene() {
     if(scene.view.type = 'perspective'){
         //transform
         let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+        let newvertices = scene.models[0].vertices;
+        for(let i = 0; i<newvertices.length; i++){
+            newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
+            //console.log(newvertices[i]);
+        };
+        
         //clip
+        let z_min = scene.view.clip[4]/scene.view.clip[5];
+
+        scene.models[0].edges.forEach(element => {
+            for(let i = 0; i<element.length-1; i++){
+                let line = {
+                    pt0: {
+                        x: newvertices[i].x, 
+                        y: newvertices[i].y,
+                        z: newvertices[i].z,
+                    },
+                    pt1: {
+                        x: newvertices[i+1].x, 
+                        y: newvertices[i+1].y,
+                        z: newvertices[i+1].z,
+                    }
+                };
+                let newline = clipLinePerspective(line, z_min);
+                if(newline != null){
+                    newvertices[i] = Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].w);
+                    newvertices[i+1] = Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].w); 
+                }
+            }
+        });
 
 
         //project
-        //          NEED TO REDO THIS, DID IT OUT OF ORDER, NEED TO TRANFORM THE POINTS SEPARATELY, THEN CLIP, THEN PROJECT
-        //          Tried to do this all in one go but that is not the way
-        let m = new Matrix(4, 4);
+        let translate11 = new Matrix(4, 4);
         let vmat = new Matrix(4, 4);
+        Mat4x4Translate(translate11, 1, 1, 0);
         vmat.values = [view.width/2, 0, 0, view.width/2, 0, view.height/2, 0, view.height/2, 0, 0, 1, 0, 0, 0, 0, 1];
-        m.values = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 0];
-        let final = m.mult(transformmat);
+
+        for(let i = 0; i<newvertices.length; i++){
+            newvertices[i] = mat4x4MPer().mult(newvertices[i])
+            newvertices[i] = translate11.mult(newvertices[i]); 
+            newvertices[i] = vmat.mult(newvertices[i]);
+            newvertices[i].data[0] =  [newvertices[i].data[0]/newvertices[i].data[3]];
+            newvertices[i].data[1] =  [newvertices[i].data[1]/newvertices[i].data[3]];
+        }
+
+        //draw line
         scene.models[0].edges.forEach(element => {
-            //console.log(element);
-            for(let i = 4; i<element.length-1; i++){
-                let point1 = final.mult(scene.models[0].vertices[element[i]]);
-                let point2 = final.mult(scene.models[0].vertices[element[i+1]]);
-                point1 = point1.mult(vmat);
-                point2 = point2.mult(vmat);
-                console.log(point1);
-                //draw line
-                drawLine((point1.data[0]/point1.data[3]), (point1.data[1]/point1.data[3]), (point2.data[0]/point2.data[3]), (point2.data[1]/point2.data[3]));
-            }        
-            drawLine(200, 300, 200, 600)    
+            for(let i = 0; i<element.length-1; i++){
+                point1 = newvertices[element[i]];
+                point2 = newvertices[element[i+1]];
+                drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
+            }           
         });
         
     }
@@ -234,7 +264,77 @@ function clipLinePerspective(line, z_min) {
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
     
-    // TODO: implement clipping here!
+    //trivial deny: check if it is outside of view plane, if it is not 0, don't draw
+    if(out0 & out1 == 0){
+        result = line;
+        //loop until trivial accept
+        while(out0 != 0 && out1 !=0){
+            //check for first point being outside
+            let dx = p0.x - p1.x;
+            let dy = p0.y - p1.y;
+            let dz = p0.z - p1.z;
+            if(out0 != 0){
+                if(out0 & LEFT){
+                    let t = (-p0.x + p0.z)/(dx-dz);
+                    p0.x = ((1-t)*p0.x) + (t*p1.x);
+                }
+                else if(out0 & RIGHT){
+                    let t = (p0.x + p0.z)/(-dx-dz);
+                    p0.x = ((1-t)*p0.x) + (t*p1.x);
+                }
+                else if(out0 & BOTTOM){
+                    let t = (-p0.y + p0.z)/(dy-dz);
+                    p0.y = ((1-t)*p0.y) + (t*p1.y);
+                }
+                else if(out0 & TOP){
+                    let t = (p0.y + p0.z)/(-dy-dz);
+                    p0.y = ((1-t)*p0.y) + (t*p1.y);
+                }
+                else if(out0 & FAR){
+                    let t = (-p0.z - 1)/(dz);
+                    p0.z = ((1-t)*p0.z) + (t*p1.z);
+                }
+                else{ // NEAR
+                    let t = (p0.z - z_min)/(-dz);
+                    p0.z = ((1-t)*p0.z) + (t*p1.z);
+                }
+                out0 = outcodePerspective(p0, z_min);
+            }
+            //second point is not inside
+            else{
+                if(out1 & LEFT){
+                    let t = (-p1.x + p1.z)/(dx-dz);
+                    p1.x = ((1-t)*p1.x) + (t*p0.x);
+                }
+                else if(out1 & RIGHT){
+                    let t = (p1.x + p1.z)/(-dx-dz);
+                    p1.x = ((1-t)*p1.x) + (t*p0.x);
+                }
+                else if(out1 & BOTTOM){
+                    let t = (-p1.y + p1.z)/(dy-dz);
+                    p1.y = ((1-t)*p1.y) + (t*p0.y);
+                }
+                else if(out1 & TOP){
+                    let t = (p1.y + p1.z)/(-dy-dz);
+                    p1.y = ((1-t)*p1.y) + (t*p0.y);
+                }
+                else if(out1 & FAR){
+                    let t = (-p1.z - 1)/(dz);
+                    p1.z = ((1-t)*p1.z) + (t*p0.z);
+                }
+                else{ // NEAR
+                    let t = (p1.z - z_min)/(-dz);
+                    p1.z = ((1-t)*p1.z) + (t*p0.z);
+                }
+                out1 = outcodePerspective(p1, z_min);
+            }
+        }
+        result.pt0 = p0;
+        result.pt1 = p1;
+    }
+
+    
+    
     
     return result;
 }
