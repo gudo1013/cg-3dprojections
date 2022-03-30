@@ -169,9 +169,7 @@ function drawScene() {
 
 
         //project
-        let translate11 = new Matrix(4, 4);
         let vmat = new Matrix(4, 4);
-        Mat4x4Translate(translate11, 1, 1, 0);
         vmat.values = [view.width/2, 0, 0, view.width/2, 0, view.height/2, 0, view.height/2, 0, 0, 1, 0, 0, 0, 0, 1];
 
         for(let i = 0; i<newvertices.length; i++){
