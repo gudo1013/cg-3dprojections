@@ -21,7 +21,7 @@ function mat4x4Parallel(prp, srp, vup, clip) {
 // create a 4x4 matrix to the perspective projection / view matrix
 function mat4x4Perspective(prp, srp, vup, clip) {
     
-
+    //console.log(prp);
     //Get VRC coordinates
     let n = prp.subtract(srp);
     n.normalize();

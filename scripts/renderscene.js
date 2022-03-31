@@ -68,7 +68,7 @@ function init() {
             view: {
                 type: 'perspective',
                 prp: Vector3(0, 10, -5),
-                srp: Vector3(-9, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
+                srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
                 vup: Vector3(1, 1, 0),
                 clip: [-12, 6, -12, 6, 10, 100]
             },
@@ -125,15 +125,19 @@ function animate(timestamp) {
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-    // window.requestAnimationFrame(animate);
+    //window.requestAnimationFrame(animate);
 }
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
     console.log(scene);
 
+    // Clear the previous drawn scene
+    ctx.clearRect(0, 0, view.width, view.height)
+
     //add the offset to the prp and srp to move along the u axis
     //don't think this will work, addtionally will run into problems when we try to load more scenes and there is an offset
+    //think directly changing the prp and srp is the way to go, probably should ask marrinan
     let newprp = new Vector(scene.view.prp);
     newprp.x = newprp.x + uoffset;
     let newsrp = new Vector(scene.view.srp);
@@ -167,11 +171,11 @@ function drawScene() {
             let transformmat = mat4x4Perspective(newprp, newsrp, scene.view.vup, scene.view.clip);
 
             // Create a copy of the vertices from the scene so as not to change the original vertices
-            let newvertices = scene.models[modelnum].vertices;
+            let newvertices = [];
             
             // Transform each of the vertices using Nper, ensuring that they are in Vector format
-            for (let i = 0; i < newvertices.length; i++) {
-                newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
+            for (let i = 0; i < scene.models[modelnum].vertices.length; i++) {
+                newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
             };
             
             //-----------CLIP---------------
@@ -181,26 +185,19 @@ function drawScene() {
             scene.models[modelnum].edges.forEach(element => {
                 // Loop through the element's edges
                 for (let i = 0; i < element.length - 1; i++) {
+                    //console.log(newvertices[element[i]])
                     // Created a line for clipping using the corresponding verticies that the edge list is associated with
                     let line = {
-                        pt0: {
-                            x: newvertices[element[i]].x,
-                            y: newvertices[element[i]].y,
-                            z: newvertices[element[i]].z,
-                        },
-                        pt1: {
-                            x: newvertices[element[i + 1]].x,
-                            y: newvertices[element[i + 1]].y,
-                            z: newvertices[element[i + 1]].z,
-                        }
+                        pt0: newvertices[element[i]],
+                        pt1: newvertices[element[i+1]]
                     };
                     
                     // Clip the line and receive a new line with the points to draw
                     let newline = clipLinePerspective(line, z_min);
-
+                    //console.log(newline);
                     // Only draw if the line exists after clipping
                     if (newline != null) {
-
+                        
                         //------------TRANSFORM-------------
 
                         // Recreate the points in Vector form and readd the w's
@@ -310,7 +307,6 @@ function clipLinePerspective(line, z_min) {
     if ((out0 & out1) == 0) {
 
         // Loop until trivial accept, if the line is already entirely in the view plane, skip the loop
-        // Result guaranteed to be a line, may or may not be clipped
         result = line;
 
         //For parametric line equation
@@ -318,7 +314,6 @@ function clipLinePerspective(line, z_min) {
 
         // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
         while ((out0 | out1) != 0) {
-
             // Check for first point being outside
             if (out0 != 0) {
 
@@ -396,11 +391,21 @@ function clipLinePerspective(line, z_min) {
                 out1 = outcodePerspective(p1, z_min);
                 
             }//else out1
+            // Check for a trivial deny case that could arise after new intersections calculated
+            if((out0 & out1) != 0){
+                out0 = 0;
+                out1 = 0;
+                result = null;
+                break;
+            }
         }//while outcodes & != 0
 
-        //Set the coordinates of the new line with intersection points to the result
-        result.pt0 = p0;
-        result.pt1 = p1;
+        
+        //Set the coordinates of the new line with intersection points to the result if the result is not null
+        if(result != null){
+            result.pt0 = p0;
+            result.pt1 = p1;
+        }
     }//if outcodes == 0
 
     // Either null or a line
