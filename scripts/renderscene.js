@@ -68,7 +68,7 @@ function init() {
             view: {
                 type: 'perspective',
                 prp: Vector3(0, 10, -5),
-                srp: Vector3(-9, 15, -40), //20, 15, -40
+                srp: Vector3(-9, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
                 vup: Vector3(1, 1, 0),
                 clip: [-12, 6, -12, 6, 10, 100]
             },
@@ -146,95 +146,92 @@ function drawScene() {
     //  * project to 2D
     //  * draw line
 
-    if (scene.view.type = 'perspective') {
-        //transform
-        let transformmat = mat4x4Perspective(newprp, newsrp, scene.view.vup, scene.view.clip);
-        let newvertices = scene.models[0].vertices;
-        
-        for (let i = 0; i < newvertices.length; i++) {
-            newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
-            //console.log(newvertices[i]);
-        };
-        
-        //clip
-        let z_min = scene.view.clip[4] / scene.view.clip[5];
-        console.log(z_min);
-        let vmat = new Matrix(4, 4);
+    // Loop through all models
+    for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
+        if (scene.view.type = 'perspective') {
 
-        vmat.values = [[view.width / 2, 0, 0, view.width / 2],
-                    [0, view.height / 2, 0, view.height / 2],
-                    [0, 0, 1, 0],
-                    [0, 0, 0, 1]];
+            // z_min = near/far (from scene clip)
+            let z_min = scene.view.clip[4] / scene.view.clip[5];
 
-        scene.models[0].edges.forEach(element => {
-            for (let i = 0; i < element.length - 1; i++) {
-                //console.log(newvertices);
-                //console.log(newvertices[i]);
-                let line = {
-                    pt0: {
-                        x: newvertices[element[i]].x,
-                        y: newvertices[element[i]].y,
-                        z: newvertices[element[i]].z,
-                    },
-                    pt1: {
-                        x: newvertices[element[i + 1]].x,
-                        y: newvertices[element[i + 1]].y,
-                        z: newvertices[element[i + 1]].z,
-                    }
-                };
-                let newline = clipLinePerspective(line, z_min);
-                if (newline != null) {
-                    //project and then draw inside right here 
-                    point1 = new Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].data[3][0]);
-                    point2 = new Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].data[3][0]);
-                    //Projection code from previous lines place here for the meantime
+            // V matrix for after the Mper transformation to transform vertices to framebuffer units based on canvas size
+            let vmat = new Matrix(4, 4);
+            vmat.values = [ [view.width / 2, 0, 0, view.width / 2],
+                            [0, view.height / 2, 0, view.height / 2],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]];
+
+
+            //-----------TRANSFORM-----------
+
+            // Get the perspective Nper matrix
+            let transformmat = mat4x4Perspective(newprp, newsrp, scene.view.vup, scene.view.clip);
+
+            // Create a copy of the vertices from the scene so as not to change the original vertices
+            let newvertices = scene.models[modelnum].vertices;
+            
+            // Transform each of the vertices using Nper, ensuring that they are in Vector format
+            for (let i = 0; i < newvertices.length; i++) {
+                newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
+            };
+            
+            //-----------CLIP---------------
+
+            // Loop through the edge list in the scene models to draw each edge
+            // element = one array in the edge list
+            scene.models[modelnum].edges.forEach(element => {
+                // Loop through the element's edges
+                for (let i = 0; i < element.length - 1; i++) {
+                    // Created a line for clipping using the corresponding verticies that the edge list is associated with
+                    let line = {
+                        pt0: {
+                            x: newvertices[element[i]].x,
+                            y: newvertices[element[i]].y,
+                            z: newvertices[element[i]].z,
+                        },
+                        pt1: {
+                            x: newvertices[element[i + 1]].x,
+                            y: newvertices[element[i + 1]].y,
+                            z: newvertices[element[i + 1]].z,
+                        }
+                    };
                     
+                    // Clip the line and receive a new line with the points to draw
+                    let newline = clipLinePerspective(line, z_min);
+
+                    // Only draw if the line exists after clipping
+                    if (newline != null) {
+
+                        //------------TRANSFORM-------------
+
+                        // Recreate the points in Vector form and readd the w's
+                        point1 = new Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].data[3][0]);
+                        point2 = new Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].data[3][0]);
                     
-    
-                    point1 = mat4x4MPer().mult(point1);
-                    point2 = mat4x4MPer().mult(point2);
-                    point1 = vmat.mult(point1);
-                    point2 = vmat.mult(point2);
-                    
-                    point1.data[0] = [point1.data[0] / point1.data[3]];
-                    point1.data[1] = [point1.data[1] / point1.data[3]];
-                    point2.data[0]= [point2.data[0] / point2.data[3]];
-                    point2.data[1]= [point2.data[1] / point2.data[3]];
-                    //draw line  
-                    
-                    drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
-                    
-                } 
-            }
-        });
-       
-    }
+                        // Multiply the points by Mper to get the final transformed vertices of the line
+                        point1 = mat4x4MPer().mult(point1);
+                        point2 = mat4x4MPer().mult(point2);
 
+                        // Translate and scale the line based on canvas side for the framebuffer
+                        point1 = vmat.mult(point1);
+                        point2 = vmat.mult(point2);
 
-        // //project
-        // let vmat = new Matrix(4, 4);
-        // vmat.values = [[view.width / 2, 0, 0, view.width / 2],
-        // [0, view.height / 2, 0, view.height / 2],
-        // [0, 0, 1, 0],
-        // [0, 0, 0, 1]];
+                        // Convert to Cartesian coordinates by dividing x and y by the vertex's w coordinate
+                        point1.data[0] = [point1.data[0] / point1.data[3]];
+                        point1.data[1] = [point1.data[1] / point1.data[3]];
+                        point2.data[0]= [point2.data[0] / point2.data[3]];
+                        point2.data[1]= [point2.data[1] / point2.data[3]];
 
-        // for (let i = 0; i < newvertices.length; i++) {
-        //     newvertices[i] = mat4x4MPer().mult(newvertices[i])
-        //     newvertices[i] = vmat.mult(newvertices[i]);
-        //     newvertices[i].data[0] = [newvertices[i].data[0] / newvertices[i].data[3]];
-        //     newvertices[i].data[1] = [newvertices[i].data[1] / newvertices[i].data[3]];
-        // }
+                        // ----------------DRAW LINE------------------ 
+                        
+                        drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
+                        
+                    } //if newline
+                }//for element
+            }); //forEach edge
+        }//if perspective
+    }//for modelnum
 
-        // //draw line
-        // scene.models[0].edges.forEach(element => {
-        //     for (let i = 0; i < element.length - 1; i++) {
-        //         point1 = newvertices[element[i]];
-        //         point2 = newvertices[element[i + 1]];
-        //         drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
-        //     }
-        // });
-
-}
+} // function drawScene()
 
 // Get outcode for vertex (parallel view volume)
 function outcodeParallel(vertex) {
@@ -267,7 +264,6 @@ function outcodePerspective(vertex, z_min) {
         outcode += LEFT;
     }
     else if (vertex.x > (-vertex.z + FLOAT_EPSILON)) {
-        //console.log(vertex.x + " " + (-vertex.z + FLOAT_EPSILON))
         outcode += RIGHT;
     }
     if (vertex.y < (vertex.z - FLOAT_EPSILON)) {
@@ -302,36 +298,38 @@ function clipLineParallel(line) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLinePerspective(line, z_min) {
     
+    // Initial Variables
     let result = null;
     let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
-console.log("--------------NEW LINE----------------")
-            console.log(p0)
-            console.log(p0.x)
     
-    //trivial deny: check if it is outside of view plane by AND, if result is not 0, return null
-    //console.log((out0 & out1) == 0)
-    
+    // Check for trivial deny: only enter loop if it is not a deny
+    // Compare AND of outcodes, if it is not equal to 0, it is a trivial deny
     if ((out0 & out1) == 0) {
-        //loop until trivial accept, if the line is already entirely in the view plane, skip the loop\
-        
+
+        // Loop until trivial accept, if the line is already entirely in the view plane, skip the loop
+        // Result guaranteed to be a line, may or may not be clipped
         result = line;
-        let i = 0;
+
+        //For parametric line equation
+        let t;
+
+        // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
         while ((out0 | out1) != 0) {
-            console.log("inside")
-            //console.log(i);
-            i++;
-                
-            //console.log(out0)
-            
-            //check for first point being outside
+
+            // Check for first point being outside
             if (out0 != 0) {
-                let t;
+
+                
+
+                //Change in x, y, and z
                 let dx = p1.x - p0.x;
                 let dy = p1.y - p0.y;
                 let dz = p1.z - p0.z;
+
+                //For the first outcode that it comes across, calculate the corresponding t value
                 if ((out0 & LEFT) >= 1) {
                     t = (-p0.x + p0.z) / (dx - dz);
                 }
@@ -350,17 +348,26 @@ console.log("--------------NEW LINE----------------")
                 else { // NEAR
                     t = (p0.z - z_min) / (-dz);
                 }
+
+                // Use the parametric line equations to update coordinates using the calculated t value
                 p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 p0.z = ((1 - t) * p0.z) + (t * p1.z);
+
+                // Recalculate the outcode using the updated coordinates
                 out0 = outcodePerspective(p0, z_min);
-            }
-            //second point is not inside
+            }// if out1
+
+            // Second point is not inside
             else {
-                let t;
+
+                // Change in x, y, and z
                 let dx = p0.x - p1.x;
                 let dy = p0.y - p1.y;
                 let dz = p0.z - p1.z;
+
+                // For the first outcode that it comes across, calculate the corresponding t value
+                // Outcode is bitwise AND with each bit representation
                 if ((out1 & LEFT) >= 1) {
                     t = (-p1.x + p1.z) / (dx - dz);
                 }
@@ -379,27 +386,27 @@ console.log("--------------NEW LINE----------------")
                 else { // NEAR
                     t = (p1.z - z_min) / (-dz);
                 }
-                p1.x = ((1 - t) * p1.x) + (t * p0.x) - FLOAT_EPSILON;
+
+                //Use the parametric line equations to update coordinates using the calculated t value
+                p1.x = ((1 - t) * p1.x) + (t * p0.x);
                 p1.y = ((1 - t) * p1.y) + (t * p0.y);
                 p1.z = ((1 - t) * p1.z) + (t * p0.z);
+
+                //Recalculate the outcode using the updated coordinates
                 out1 = outcodePerspective(p1, z_min);
                 
-            }
-            //break;
-        }
+            }//else out1
+        }//while outcodes & != 0
+
+        //Set the coordinates of the new line with intersection points to the result
         result.pt0 = p0;
         result.pt1 = p1;
-        
-    }
-    else{
-        //console.log(out0 + " + " + out1)
-        //console.log(p0);
-        //console.log(p1);
-    }
-    
-    
+    }//if outcodes == 0
+
+    // Either null or a line
     return result;
-}
+
+}// function clipLinePerspective
 
 
 // Called when user presses a key on the keyboard down 
