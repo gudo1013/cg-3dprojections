@@ -26,12 +26,12 @@ function init() {
 
 
     // initial scene... feel free to change this
-    
+    /*
     scene = {
         view: {
             type: 'perspective',
             prp: Vector3(44, 20, -16),
-            srp: Vector3(13, 20, -40),
+            srp: Vector3(20, 20, -40),
             vup: Vector3(0, 1, 0),
             clip: [-19, 5, -10, 8, 12, 100]
         },
@@ -63,12 +63,12 @@ function init() {
             }
         ]
         
-        /*
+        */
         scene = {
             view: {
                 type: 'perspective',
                 prp: Vector3(0, 10, -5),
-                srp: Vector3(20, 15, -40),
+                srp: Vector3(-9, 15, -40), //20, 15, -40
                 vup: Vector3(1, 1, 0),
                 clip: [-12, 6, -12, 6, 10, 100]
             },
@@ -99,7 +99,7 @@ function init() {
                     matrix: new Matrix(4, 4)
                 }
             ]
-            */
+            
             
     };
 
@@ -307,80 +307,81 @@ function clipLinePerspective(line, z_min) {
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
-
+console.log("--------------NEW LINE----------------")
+            console.log(p0)
+            console.log(p0.x)
     
     //trivial deny: check if it is outside of view plane by AND, if result is not 0, return null
     //console.log((out0 & out1) == 0)
+    
     if ((out0 & out1) == 0) {
         //loop until trivial accept, if the line is already entirely in the view plane, skip the loop\
-        //console.log("inside");
+        
         result = line;
         let i = 0;
         while ((out0 | out1) != 0) {
-            //console.log("inside")
-            console.log(i);
+            console.log("inside")
+            //console.log(i);
             i++;
+                
+            //console.log(out0)
+            
             //check for first point being outside
             if (out0 != 0) {
+                let t;
                 let dx = p1.x - p0.x;
                 let dy = p1.y - p0.y;
                 let dz = p1.z - p0.z;
                 if ((out0 & LEFT) >= 1) {
-                    let t = (-p0.x + p0.z) / (dx - dz);
-                    p0.x = ((1 - t) * p0.x) + (t * p1.x);
+                    t = (-p0.x + p0.z) / (dx - dz);
                 }
                 else if ((out0 & RIGHT) >= 1) {
-                    let t = (p0.x + p0.z) / ((-dx) - dz);
-                    p0.x = ((1 - t) * p0.x) + (t * p1.x);
-                    
+                    t = (p0.x + p0.z) / ((-dx) - dz);     
                 }
                 else if ((out0 & BOTTOM) >= 1) {
-                    let t = (-p0.y + p0.z) / (dy - dz);
-                    p0.y = ((1 - t) * p0.y) + (t * p1.y);
+                    t = (-p0.y + p0.z) / (dy - dz);
                 }
                 else if ((out0 & TOP) >= 1) {
-                    let t = (p0.y + p0.z) / (-dy - dz);
-                    p0.y = ((1 - t) * p0.y) + (t * p1.y);
+                    t = (p0.y + p0.z) / (-dy - dz);
                 }
                 else if ((out0 & FAR) >= 1) {
-                    let t = (-p0.z - 1) / (dz);
-                    p0.z = ((1 - t) * p0.z) + (t * p1.z);
+                    t = (-p0.z - 1) / (dz);
                 }
                 else { // NEAR
-                    let t = (p0.z - z_min) / (-dz);
-                    p0.z = ((1 - t) * p0.z) + (t * p1.z);
+                    t = (p0.z - z_min) / (-dz);
                 }
+                p0.x = ((1 - t) * p0.x) + (t * p1.x);
+                p0.y = ((1 - t) * p0.y) + (t * p1.y);
+                p0.z = ((1 - t) * p0.z) + (t * p1.z);
                 out0 = outcodePerspective(p0, z_min);
             }
             //second point is not inside
             else {
+                let t;
                 let dx = p0.x - p1.x;
                 let dy = p0.y - p1.y;
                 let dz = p0.z - p1.z;
                 if ((out1 & LEFT) >= 1) {
-                    let t = (-p1.x + p1.z) / (dx - dz);
-                    p1.x = ((1 - t) * p1.x) + (t * p0.x);
+                    t = (-p1.x + p1.z) / (dx - dz);
                 }
                 else if ((out1 & RIGHT) >= 1) {
-                    let t = (p1.x + p1.z) / (-dx - dz);
-                    p1.x = ((1 - t) * p1.x) + (t * p0.x);
+                    t = (p1.x + p1.z) / (-dx - dz);
                 }
                 else if ((out1 & BOTTOM) >= 1) {
-                    let t = (-p1.y + p1.z) / (dy - dz);
-                    p1.y = ((1 - t) * p1.y) + (t * p0.y);
+                    t = (-p1.y + p1.z) / (dy - dz);
                 }
                 else if ((out1 & TOP) >= 1) {
-                    let t = (p1.y + p1.z) / (-dy - dz);
-                    p1.y = ((1 - t) * p1.y) + (t * p0.y);
+                    t = (p1.y + p1.z) / (-dy - dz);
                 }
                 else if ((out1 & FAR )>= 1) {
-                    let t = (-p1.z - 1) / (dz);
-                    p1.z = ((1 - t) * p1.z) + (t * p0.z);
+                    t = (-p1.z - 1) / (dz);
                 }
                 else { // NEAR
-                    let t = (p1.z - z_min) / (-dz);
-                    p1.z = ((1 - t) * p1.z) + (t * p0.z);
+                    t = (p1.z - z_min) / (-dz);
                 }
+                p1.x = ((1 - t) * p1.x) + (t * p0.x) - FLOAT_EPSILON;
+                p1.y = ((1 - t) * p1.y) + (t * p0.y);
+                p1.z = ((1 - t) * p1.z) + (t * p0.z);
                 out1 = outcodePerspective(p1, z_min);
                 
             }
