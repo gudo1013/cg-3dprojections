@@ -11,6 +11,9 @@ const FAR = 2;  // binary 000010
 const NEAR = 1;  // binary 000001
 const FLOAT_EPSILON = 0.000001;
 
+let uoffset = 0;
+let noffset = 0;
+
 // Initialization function - called when web page loads
 function init() {
     let w = 800;
@@ -23,12 +26,12 @@ function init() {
 
 
     // initial scene... feel free to change this
-    /*
+    
     scene = {
         view: {
             type: 'perspective',
             prp: Vector3(44, 20, -16),
-            srp: Vector3(20, 20, -40),
+            srp: Vector3(13, 20, -40),
             vup: Vector3(0, 1, 0),
             clip: [-19, 5, -10, 8, 12, 100]
         },
@@ -59,8 +62,8 @@ function init() {
                 matrix: new Matrix(4, 4)
             }
         ]
-        */
         
+        /*
         scene = {
             view: {
                 type: 'perspective',
@@ -96,6 +99,7 @@ function init() {
                     matrix: new Matrix(4, 4)
                 }
             ]
+            */
             
     };
 
@@ -128,6 +132,13 @@ function animate(timestamp) {
 function drawScene() {
     console.log(scene);
 
+    //add the offset to the prp and srp to move along the u axis
+    //don't think this will work, addtionally will run into problems when we try to load more scenes and there is an offset
+    let newprp = new Vector(scene.view.prp);
+    newprp.x = newprp.x + uoffset;
+    let newsrp = new Vector(scene.view.srp);
+    newsrp.x = newsrp.x + uoffset;
+
     // TODO: implement drawing here!
     // For each model, for each edge
     //  * transform to canonical view volume  - - - - - Believe this is completed for perspective
@@ -137,7 +148,7 @@ function drawScene() {
 
     if (scene.view.type = 'perspective') {
         //transform
-        let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+        let transformmat = mat4x4Perspective(newprp, newsrp, scene.view.vup, scene.view.clip);
         let newvertices = scene.models[0].vertices;
         
         for (let i = 0; i < newvertices.length; i++) {
@@ -147,6 +158,7 @@ function drawScene() {
         
         //clip
         let z_min = scene.view.clip[4] / scene.view.clip[5];
+        console.log(z_min);
         let vmat = new Matrix(4, 4);
 
         vmat.values = [[view.width / 2, 0, 0, view.width / 2],
@@ -239,10 +251,10 @@ function outcodeParallel(vertex) {
     else if (vertex.y > (1.0 + FLOAT_EPSILON)) {
         outcode += TOP;
     }
-    if (vertex.x < (-1.0 - FLOAT_EPSILON)) {
+    if (vertex.z < (-1.0 - FLOAT_EPSILON)) {
         outcode += FAR;
     }
-    else if (vertex.x > (0.0 + FLOAT_EPSILON)) {
+    else if (vertex.z > (0.0 + FLOAT_EPSILON)) {
         outcode += NEAR;
     }
     return outcode;
@@ -255,6 +267,7 @@ function outcodePerspective(vertex, z_min) {
         outcode += LEFT;
     }
     else if (vertex.x > (-vertex.z + FLOAT_EPSILON)) {
+        //console.log(vertex.x + " " + (-vertex.z + FLOAT_EPSILON))
         outcode += RIGHT;
     }
     if (vertex.y < (vertex.z - FLOAT_EPSILON)) {
@@ -263,10 +276,10 @@ function outcodePerspective(vertex, z_min) {
     else if (vertex.y > (-vertex.z + FLOAT_EPSILON)) {
         outcode += TOP;
     }
-    if (vertex.x < (-1.0 - FLOAT_EPSILON)) {
+    if (vertex.z < (-1.0 - FLOAT_EPSILON)) {
         outcode += FAR;
     }
-    else if (vertex.x > (z_min + FLOAT_EPSILON)) {
+    else if (vertex.z > (z_min + FLOAT_EPSILON)) {
         outcode += NEAR;
     }
     return outcode;
@@ -297,32 +310,39 @@ function clipLinePerspective(line, z_min) {
 
     
     //trivial deny: check if it is outside of view plane by AND, if result is not 0, return null
-    if (out0 & out1 == 0) {
-        //loop until trivial accept, if the line is already entirely in the view plane, skip the loop
+    //console.log((out0 & out1) == 0)
+    if ((out0 & out1) == 0) {
+        //loop until trivial accept, if the line is already entirely in the view plane, skip the loop\
+        //console.log("inside");
         result = line;
-        while (out0 != 0 && out1 != 0) {
+        let i = 0;
+        while ((out0 | out1) != 0) {
+            //console.log("inside")
+            console.log(i);
+            i++;
             //check for first point being outside
-            let dx = p0.x - p1.x;
-            let dy = p0.y - p1.y;
-            let dz = p0.z - p1.z;
             if (out0 != 0) {
-                if (out0 & LEFT) {
+                let dx = p1.x - p0.x;
+                let dy = p1.y - p0.y;
+                let dz = p1.z - p0.z;
+                if ((out0 & LEFT) >= 1) {
                     let t = (-p0.x + p0.z) / (dx - dz);
                     p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 }
-                else if (out0 & RIGHT) {
-                    let t = (p0.x + p0.z) / (-dx - dz);
+                else if ((out0 & RIGHT) >= 1) {
+                    let t = (p0.x + p0.z) / ((-dx) - dz);
                     p0.x = ((1 - t) * p0.x) + (t * p1.x);
+                    
                 }
-                else if (out0 & BOTTOM) {
+                else if ((out0 & BOTTOM) >= 1) {
                     let t = (-p0.y + p0.z) / (dy - dz);
                     p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 }
-                else if (out0 & TOP) {
+                else if ((out0 & TOP) >= 1) {
                     let t = (p0.y + p0.z) / (-dy - dz);
                     p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 }
-                else if (out0 & FAR) {
+                else if ((out0 & FAR) >= 1) {
                     let t = (-p0.z - 1) / (dz);
                     p0.z = ((1 - t) * p0.z) + (t * p1.z);
                 }
@@ -334,23 +354,26 @@ function clipLinePerspective(line, z_min) {
             }
             //second point is not inside
             else {
-                if (out1 & LEFT) {
+                let dx = p0.x - p1.x;
+                let dy = p0.y - p1.y;
+                let dz = p0.z - p1.z;
+                if ((out1 & LEFT) >= 1) {
                     let t = (-p1.x + p1.z) / (dx - dz);
                     p1.x = ((1 - t) * p1.x) + (t * p0.x);
                 }
-                else if (out1 & RIGHT) {
+                else if ((out1 & RIGHT) >= 1) {
                     let t = (p1.x + p1.z) / (-dx - dz);
                     p1.x = ((1 - t) * p1.x) + (t * p0.x);
                 }
-                else if (out1 & BOTTOM) {
+                else if ((out1 & BOTTOM) >= 1) {
                     let t = (-p1.y + p1.z) / (dy - dz);
                     p1.y = ((1 - t) * p1.y) + (t * p0.y);
                 }
-                else if (out1 & TOP) {
+                else if ((out1 & TOP) >= 1) {
                     let t = (p1.y + p1.z) / (-dy - dz);
                     p1.y = ((1 - t) * p1.y) + (t * p0.y);
                 }
-                else if (out1 & FAR) {
+                else if ((out1 & FAR )>= 1) {
                     let t = (-p1.z - 1) / (dz);
                     p1.z = ((1 - t) * p1.z) + (t * p0.z);
                 }
@@ -359,13 +382,21 @@ function clipLinePerspective(line, z_min) {
                     p1.z = ((1 - t) * p1.z) + (t * p0.z);
                 }
                 out1 = outcodePerspective(p1, z_min);
+                
             }
+            //break;
         }
         result.pt0 = p0;
         result.pt1 = p1;
+        
+    }
+    else{
+        //console.log(out0 + " + " + out1)
+        //console.log(p0);
+        //console.log(p1);
     }
     
-
+    
     return result;
 }
 
@@ -381,9 +412,11 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
+            uoffset--;
             break;
         case 68: // D key
             console.log("D");
+            uoffset++;
             break;
         case 83: // S key
             console.log("S");
@@ -392,6 +425,7 @@ function onKeyDown(event) {
             console.log("W");
             break;
     }
+    drawScene();
 }
 
 ///////////////////////////////////////////////////////////////////////////
