@@ -103,7 +103,7 @@ function Mat4x4Translate(mat4x4, tx, ty, tz) {
 function Mat4x4Scale(mat4x4, sx, sy, sz) {
     mat4x4.values = [[sx, 0, 0, 0],
                     [0, sy, 0, 0],
-                    [0, 0, sz, 0] 
+                    [0, 0, sz, 0], 
                     [0, 0, 0, 1]];
 }
 

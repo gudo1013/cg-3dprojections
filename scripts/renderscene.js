@@ -23,6 +23,7 @@ function init() {
 
 
     // initial scene... feel free to change this
+    /*
     scene = {
         view: {
             type: 'perspective',
@@ -58,8 +59,8 @@ function init() {
                 matrix: new Matrix(4, 4)
             }
         ]
-
-        /*
+        */
+        
         scene = {
             view: {
                 type: 'perspective',
@@ -95,7 +96,7 @@ function init() {
                     matrix: new Matrix(4, 4)
                 }
             ]
-            */
+            
     };
 
 
@@ -138,16 +139,20 @@ function drawScene() {
         //transform
         let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
         let newvertices = scene.models[0].vertices;
+        //console.log(scene.models[0].vertices)
         for (let i = 0; i < newvertices.length; i++) {
             newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
-            //console.log(newvertices[i]);
+            console.log(newvertices[i]);
         };
+
 
         //clip
         let z_min = scene.view.clip[4] / scene.view.clip[5];
-
+        let vmat = new Matrix(4, 4);
+        console.log(newvertices);
         scene.models[0].edges.forEach(element => {
             for (let i = 0; i < element.length - 1; i++) {
+                console.log(newvertices[i]);
                 let line = {
                     pt0: {
                         x: newvertices[i].x,
@@ -161,11 +166,13 @@ function drawScene() {
                     }
                 };
                 let newline = clipLinePerspective(line, z_min);
+                
                 if (newline != null) {
                     //project and then draw inside right here 
-                    
+                    point1 = new Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].data[3][0]);
+                    point2 = new Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i].data[3]);
                     //Projection code from previous lines place here for the meantime
-                    let vmat = new Matrix(4, 4);
+                    
                     vmat.values = [[view.width / 2, 0, 0, view.width / 2],
                     [0, view.height / 2, 0, view.height / 2],
                     [0, 0, 1, 0],
@@ -178,8 +185,7 @@ function drawScene() {
                     newvertices[i].data[1] = [newvertices[i].data[1] / newvertices[i].data[3]];
 
                     //draw line  
-                    point1 = newvertices[element[i]];
-                    point2 = newvertices[element[i + 1]];
+                    
                     drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
                     
                 }
@@ -264,6 +270,7 @@ function outcodePerspective(vertex, z_min) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLineParallel(line) {
     let result = null;
+   
     let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodeParallel(p0);
@@ -277,17 +284,20 @@ function clipLineParallel(line) {
 // Clip line - should either return a new line (with two endpoints inside view volume) or null (if line is completely outside view volume)
 function clipLinePerspective(line, z_min) {
     let result = null;
+     //console.log("set vector 3")
     let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
+    //console.log(line);
+    //console.log("set vector 3after")
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
+    
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
 
-    //trivial deny: check if it is outside of view plane, if both are 0, just draw the line
+    //console.log(out0 & out1);
+    //trivial deny: check if it is outside of view plane by AND, if result is not 0, return null
     if (out0 & out1 == 0) {
+        //loop until trivial accept, if the line is already entirely in the view plane, skip the loop
         result = line;
-    }
-    //loop until trivial accept
-    else {
         while (out0 != 0 && out1 != 0) {
             //check for first point being outside
             let dx = p0.x - p1.x;
@@ -349,9 +359,10 @@ function clipLinePerspective(line, z_min) {
                 out1 = outcodePerspective(p1, z_min);
             }
         }
+        result.pt0 = p0;
+        result.pt1 = p1;
     }
-    result.pt0 = p0;
-    result.pt1 = p1;
+    
 
     return result;
 }
