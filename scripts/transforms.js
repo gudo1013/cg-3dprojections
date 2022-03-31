@@ -108,7 +108,7 @@ function Mat4x4Scale(mat4x4, sx, sy, sz) {
 }
 
 // set values of existing 4x4 matrix to the rotate about x-axis matrix
-function Mat4x4RotateX(mat4x4, theta) {
+function Mat4x4RotateX(mat4x4, theta){
     let rad = theta * Math.PI / 180; //convert to radians
     mat4x4.values = [[1, 0, 0, 0],
                     [0, Math.cos(rad), -Math.sin(rad), 0],

@@ -71,6 +71,7 @@ function init() {
                 srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
                 vup: Vector3(1, 1, 0),
                 clip: [-12, 6, -12, 6, 10, 100]
+                
             },
             models: [
                 {
@@ -96,6 +97,10 @@ function init() {
                         [3, 8],
                         [4, 9]
                     ],
+                    animation: {
+                        axis: 'x',
+                        rps: 0.5
+                    },
                     matrix: new Matrix(4, 4)
                 }
             ]
@@ -116,32 +121,59 @@ function init() {
 function animate(timestamp) {
     // step 1: calculate time (time since start)
     let time = timestamp - start_time;
-
+    let seconds = time/1000;
+    //console.log(seconds);
     // step 2: transform models based on time
-    // TODO: implement this!
+    let rotatemat = new Matrix(4,4);
+    for(let i = 0; i < scene.models.length; i++){
+        if (scene.models[i].animation != undefined){
+
+            let theta = 1;
+            for(let j = 0; j < scene.models[i].vertices.length; j++){
+                switch(scene.models[i].animation.axis){
+                    case 'x': 
+                        Mat4x4RotateX(rotatemat, theta);
+                        break;
+                    case 'y':
+                        Mat4x4RotateY(rotatemat, theta);
+                        break;
+                    case 'z':sw
+                        Mat4x4RotateZ(rotatemat, theta);
+                        break;
+                }
+                scene.models[i].vertices[j] = new Vector(rotatemat.mult(scene.models[i].vertices[j]));
+            }
+            
+        }
+    }
+    
 
     // step 3: draw scene
     drawScene();
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-    //window.requestAnimationFrame(animate);
+    window.requestAnimationFrame(animate);
 }
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
-    console.log(scene);
+    //console.log(scene);
 
     // Clear the previous drawn scene
     ctx.clearRect(0, 0, view.width, view.height)
 
-    //add the offset to the prp and srp to move along the u axis
-    //don't think this will work, addtionally will run into problems when we try to load more scenes and there is an offset
-    //think directly changing the prp and srp is the way to go, probably should ask marrinan
+    // Add the offset to the prp and srp in the x direction and negative offset in the y direction to move along the u-axis
+    // Add the offset to the prp and srp in the z direction to move along the n-axis
+    // ------ One concern may be if we load a new scene that the offset does not reset, so may have to actually change the prp and srp directly in the scene ------
     let newprp = new Vector(scene.view.prp);
     newprp.x = newprp.x + uoffset;
+    newprp.y = newprp.y - uoffset;
+    newprp.z = newprp.z - noffset;
     let newsrp = new Vector(scene.view.srp);
     newsrp.x = newsrp.x + uoffset;
+    newsrp.y = newsrp.y - uoffset;
+    newsrp.z = newsrp.z - noffset;
 
     // TODO: implement drawing here!
     // For each model, for each edge
@@ -267,9 +299,11 @@ function outcodePerspective(vertex, z_min) {
         outcode += BOTTOM;
     }
     else if (vertex.y > (-vertex.z + FLOAT_EPSILON)) {
+        console.log(vertex.y + " TOP " + (-vertex.z + FLOAT_EPSILON));
         outcode += TOP;
     }
     if (vertex.z < (-1.0 - FLOAT_EPSILON)) {
+        console.log(vertex.z + " FAR " + (-1.0 - FLOAT_EPSILON));
         outcode += FAR;
     }
     else if (vertex.z > (z_min + FLOAT_EPSILON)) {
@@ -313,11 +347,13 @@ function clipLinePerspective(line, z_min) {
         let t;
 
         // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
-        while ((out0 | out1) != 0) {
+        while ((out0 | out1) != 0 && result != null) {
+
+            
+            console.log("out0 = " + out0 + ", out1 = " + out1);
+
             // Check for first point being outside
             if (out0 != 0) {
-
-                
 
                 //Change in x, y, and z
                 let dx = p1.x - p0.x;
@@ -335,10 +371,10 @@ function clipLinePerspective(line, z_min) {
                     t = (-p0.y + p0.z) / (dy - dz);
                 }
                 else if ((out0 & TOP) >= 1) {
-                    t = (p0.y + p0.z) / (-dy - dz);
+                    t = (p0.y + p0.z) / ((-dy) - dz);
                 }
                 else if ((out0 & FAR) >= 1) {
-                    t = (-p0.z - 1) / (dz);
+                    t = ((-p0.z) - 1) / (dz);
                 }
                 else { // NEAR
                     t = (p0.z - z_min) / (-dz);
@@ -373,10 +409,10 @@ function clipLinePerspective(line, z_min) {
                     t = (-p1.y + p1.z) / (dy - dz);
                 }
                 else if ((out1 & TOP) >= 1) {
-                    t = (p1.y + p1.z) / (-dy - dz);
+                    t = (p1.y + p1.z) / ((-dy) - dz);
                 }
                 else if ((out1 & FAR )>= 1) {
-                    t = (-p1.z - 1) / (dz);
+                    t = ((-p1.z) - 1) / (dz);
                 }
                 else { // NEAR
                     t = (p1.z - z_min) / (-dz);
@@ -396,7 +432,6 @@ function clipLinePerspective(line, z_min) {
                 out0 = 0;
                 out1 = 0;
                 result = null;
-                break;
             }
         }//while outcodes & != 0
 
@@ -433,9 +468,11 @@ function onKeyDown(event) {
             break;
         case 83: // S key
             console.log("S");
+            noffset--;
             break;
         case 87: // W key
             console.log("W");
+            noffset++;
             break;
     }
     drawScene();
