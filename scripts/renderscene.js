@@ -13,6 +13,7 @@ const FLOAT_EPSILON = 0.000001;
 
 let uoffset = 0;
 let noffset = 0;
+let voffset = 0;
 
 // Initialization function - called when web page loads
 function init() {
@@ -99,7 +100,7 @@ function init() {
                     ],
                     animation: {
                         axis: 'x',
-                        rps: 0.5
+                        rps: .5
                     },
                     matrix: new Matrix(4, 4)
                 }
@@ -128,7 +129,7 @@ function animate(timestamp) {
     for(let i = 0; i < scene.models.length; i++){
         if (scene.models[i].animation != undefined){
 
-            let theta = 1;
+            let theta = scene.models[i].animation.rps * 6;
             for(let j = 0; j < scene.models[i].vertices.length; j++){
                 switch(scene.models[i].animation.axis){
                     case 'x': 
@@ -153,7 +154,7 @@ function animate(timestamp) {
 
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
-    window.requestAnimationFrame(animate);
+    //window.requestAnimationFrame(animate);
 }
 
 // Main drawing code - use information contained in variable `scene`
@@ -167,12 +168,12 @@ function drawScene() {
     // Add the offset to the prp and srp in the z direction to move along the n-axis
     // ------ One concern may be if we load a new scene that the offset does not reset, so may have to actually change the prp and srp directly in the scene ------
     let newprp = new Vector(scene.view.prp);
-    newprp.x = newprp.x + uoffset;
-    newprp.y = newprp.y - uoffset;
+    newprp.x = newprp.x - uoffset;
+    newprp.y = newprp.y + uoffset;
     newprp.z = newprp.z - noffset;
     let newsrp = new Vector(scene.view.srp);
-    newsrp.x = newsrp.x + uoffset;
-    newsrp.y = newsrp.y - uoffset;
+    newsrp.x = newsrp.x - uoffset + voffset;
+    newsrp.y = newsrp.y + uoffset - voffset;
     newsrp.z = newsrp.z - noffset;
 
     // TODO: implement drawing here!
@@ -350,7 +351,7 @@ function clipLinePerspective(line, z_min) {
         while ((out0 | out1) != 0 && result != null) {
 
             
-            console.log("out0 = " + out0 + ", out1 = " + out1);
+            console.log("x = " + p0.x + ", y = " + p0.y + ", z = " + p0.z);
 
             // Check for first point being outside
             if (out0 != 0) {
@@ -454,9 +455,11 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
+            voffset--;
             break;
         case 39: // RIGHT Arrow
             console.log("right");
+            voffset++;
             break;
         case 65: // A key
             console.log("A");
