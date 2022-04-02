@@ -123,6 +123,13 @@ function animate(timestamp) {
     // step 1: calculate time (time since start)
     let time = timestamp - start_time;
     let seconds = time/1000;
+
+    //What if we did something with taking the calculation of 1000 milleseconds,
+    //and delaying the for loop to run so it only happens every 1/60th of a
+    //second, with Thread.sleep? 
+    //let spaceTime = 1000/(60*scene.models.animation.rps);
+    //Thread.sleep(spaceTime)
+
     //console.log(seconds);
     // step 2: transform models based on time
     let rotatemat = new Matrix(4,4);
