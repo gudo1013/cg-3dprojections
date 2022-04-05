@@ -65,11 +65,59 @@ function init() {
         ]
         
         */
+    //     scene = {
+    //         view: {
+    //             type: 'perspective',
+    //             prp: Vector3(0, 10, -5),
+    //             srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+    //             vup: Vector3(1, 1, 0),
+    //             clip: [-12, 6, -12, 6, 10, 100]
+                
+    //         },
+    //         models: [
+    //             {
+    //                 type: 'generic',
+    //                 vertices: [
+    //                     Vector4( 0,  0, -30, 1),
+    //                     Vector4(20,  0, -30, 1),
+    //                     Vector4(20, 12, -30, 1),
+    //                     Vector4(10, 20, -30, 1),
+    //                     Vector4( 0, 12, -30, 1),
+    //                     Vector4( 0,  0, -60, 1),
+    //                     Vector4(20,  0, -60, 1),
+    //                     Vector4(20, 12, -60, 1),
+    //                     Vector4(10, 20, -60, 1),
+    //                     Vector4( 0, 12, -60, 1)
+    //                 ],
+    //                 edges: [
+    //                     [0, 1, 2, 3, 4, 0],
+    //                     [5, 6, 7, 8, 9, 5],
+    //                     [0, 5],
+    //                     [1, 6],
+    //                     [2, 7],
+    //                     [3, 8],
+    //                     [4, 9]
+    //                 ],
+    //                 animation: {
+    //                     axis: 'x',
+    //                     rps: .5
+    //                 },
+    //                 matrix: new Matrix(4, 4)
+    //             }
+    //         ]
+            
+            
+    // };
+
+
+
+        //Writing new scenes for new shapes
+        //Cube
         scene = {
             view: {
                 type: 'perspective',
                 prp: Vector3(0, 10, -5),
-                srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+                srp: Vector3(20, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
                 vup: Vector3(1, 1, 0),
                 clip: [-12, 6, -12, 6, 10, 100]
                 
@@ -78,25 +126,22 @@ function init() {
                 {
                     type: 'generic',
                     vertices: [
-                        Vector4( 0,  0, -30, 1),
-                        Vector4(20,  0, -30, 1),
-                        Vector4(20, 12, -30, 1),
-                        Vector4(10, 20, -30, 1),
-                        Vector4( 0, 12, -30, 1),
-                        Vector4( 0,  0, -60, 1),
-                        Vector4(20,  0, -60, 1),
-                        Vector4(20, 12, -60, 1),
-                        Vector4(10, 20, -60, 1),
-                        Vector4( 0, 12, -60, 1)
+                        Vector4(0, 10, -30, 1),
+                        Vector4(0,  0, -30, 1),
+                        Vector4(10, 0, -30, 1),
+                        Vector4(10, 10, -30, 1),
+                        Vector4(0, 10, -40, 1),
+                        Vector4(0, 0, -40, 1),
+                        Vector4(10, 0, -40, 1),
+                        Vector4(10, 10, -40, 1)
                     ],
                     edges: [
-                        [0, 1, 2, 3, 4, 0],
-                        [5, 6, 7, 8, 9, 5],
-                        [0, 5],
-                        [1, 6],
-                        [2, 7],
-                        [3, 8],
-                        [4, 9]
+                        [0, 1, 2, 3, 0],
+                        [4, 5, 6, 7, 4],
+                        [0, 4],
+                        [1, 5],
+                        [2, 6],
+                        [3, 7]
                     ],
                     animation: {
                         axis: 'x',
