@@ -65,52 +65,52 @@ function init() {
         ]
         
         */
-    //     scene = {
-    //         view: {
-    //             type: 'perspective',
-    //             prp: Vector3(0, 10, -5),
-    //             srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
-    //             vup: Vector3(1, 1, 0),
-    //             clip: [-12, 6, -12, 6, 10, 100]
+         scene = {
+             view: {
+                 type: 'perspective',
+                 prp: Vector3(0, 10, -5),
+                 srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+                 vup: Vector3(1, 1, 0),
+                 clip: [-12, 6, -12, 6, 10, 100]
                 
-    //         },
-    //         models: [
-    //             {
-    //                 type: 'generic',
-    //                 vertices: [
-    //                     Vector4( 0,  0, -30, 1),
-    //                     Vector4(20,  0, -30, 1),
-    //                     Vector4(20, 12, -30, 1),
-    //                     Vector4(10, 20, -30, 1),
-    //                     Vector4( 0, 12, -30, 1),
-    //                     Vector4( 0,  0, -60, 1),
-    //                     Vector4(20,  0, -60, 1),
-    //                     Vector4(20, 12, -60, 1),
-    //                     Vector4(10, 20, -60, 1),
-    //                     Vector4( 0, 12, -60, 1)
-    //                 ],
-    //                 edges: [
-    //                     [0, 1, 2, 3, 4, 0],
-    //                     [5, 6, 7, 8, 9, 5],
-    //                     [0, 5],
-    //                     [1, 6],
-    //                     [2, 7],
-    //                     [3, 8],
-    //                     [4, 9]
-    //                 ],
-    //                 animation: {
-    //                     axis: 'x',
-    //                     rps: .5
-    //                 },
-    //                 matrix: new Matrix(4, 4)
-    //             }
-    //         ]
+             },
+             models: [
+                 {
+                     type: 'generic',
+                     vertices: [
+                         Vector4( 0,  0, -30, 1),
+                         Vector4(20,  0, -30, 1),
+                         Vector4(20, 12, -30, 1),
+                         Vector4(10, 20, -30, 1),
+                         Vector4( 0, 12, -30, 1),
+                         Vector4( 0,  0, -60, 1),
+                         Vector4(20,  0, -60, 1),
+                         Vector4(20, 12, -60, 1),
+                         Vector4(10, 20, -60, 1),
+                         Vector4( 0, 12, -60, 1)
+                     ],
+                     edges: [
+                         [0, 1, 2, 3, 4, 0],
+                         [5, 6, 7, 8, 9, 5],
+                         [0, 5],
+                         [1, 6],
+                         [2, 7],
+                         [3, 8],
+                         [4, 9]
+                     ],
+                     animation: {
+                         axis: 'x',
+                         rps: .5
+                     },
+                     matrix: new Matrix(4, 4)
+                 }
+             ]
             
             
-    // };
+     };
 
 
-
+        /*
         //Writing new scenes for new shapes
         //Cube
         scene = {
@@ -150,9 +150,9 @@ function init() {
                     matrix: new Matrix(4, 4)
                 }
             ]
+            */
             
-            
-    };
+    //};
 
         //Cone
     //     scene = {
@@ -249,7 +249,7 @@ function animate(timestamp) {
     for(let i = 0; i < scene.models.length; i++){
         if (scene.models[i].animation != undefined){
 
-            let theta = 0//scene.models[i].animation.rps * 6;
+            let theta = 1//scene.models[i].animation.rps * 6;
             for(let j = 0; j < scene.models[i].vertices.length; j++){
                 switch(scene.models[i].animation.axis){
                     case 'x': 
@@ -410,20 +410,23 @@ function outcodeParallel(vertex) {
 function outcodePerspective(vertex, z_min) {
     let outcode = 0;
     if (vertex.x < (vertex.z - FLOAT_EPSILON)) {
+        //console.log(vertex.x + " LEFT " + (-vertex.z + FLOAT_EPSILON));
         outcode += LEFT;
     }
     else if (vertex.x > (-vertex.z + FLOAT_EPSILON)) {
+        //console.log(vertex.x + " RIGHT " + (-vertex.z + FLOAT_EPSILON));
         outcode += RIGHT;
     }
     if (vertex.y < (vertex.z - FLOAT_EPSILON)) {
+        //console.log(vertex.y + " BOTTOM " + (-vertex.z + FLOAT_EPSILON));
         outcode += BOTTOM;
     }
     else if (vertex.y > (-vertex.z + FLOAT_EPSILON)) {
-        console.log(vertex.y + " TOP " + (-vertex.z + FLOAT_EPSILON));
+        //console.log(vertex.y + " TOP " + (-vertex.z + FLOAT_EPSILON));
         outcode += TOP;
     }
     if (vertex.z < (-1.0 - FLOAT_EPSILON)) {
-        console.log(vertex.z + " FAR " + (-1.0 - FLOAT_EPSILON));
+        //console.log(vertex.z + " FAR " + (-1.0 - FLOAT_EPSILON));
         outcode += FAR;
     }
     else if (vertex.z > (z_min + FLOAT_EPSILON)) {
@@ -455,6 +458,7 @@ function clipLinePerspective(line, z_min) {
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
+    console.log(z_min);
     
     // Check for trivial deny: only enter loop if it is not a deny
     // Compare AND of outcodes, if it is not equal to 0, it is a trivial deny
@@ -464,13 +468,15 @@ function clipLinePerspective(line, z_min) {
         result = line;
 
         //For parametric line equation
-        let t;
+        
 
+        console.log("----------------------------------FIRST--------------------------");
         // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
         while ((out0 | out1) != 0 && result != null) {
 
-            
-            console.log("x = " + p0.x + ", y = " + p0.y + ", z = " + p0.z);
+            //console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
+            //console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
+            let t;
 
             // Check for first point being outside
             if (out0 != 0) {
@@ -482,25 +488,37 @@ function clipLinePerspective(line, z_min) {
 
                 //For the first outcode that it comes across, calculate the corresponding t value
                 if ((out0 & LEFT) >= 1) {
+                    console.log("LEFT")
                     t = (-p0.x + p0.z) / (dx - dz);
                 }
                 else if ((out0 & RIGHT) >= 1) {
-                    t = (p0.x + p0.z) / ((-dx) - dz);     
+                    console.log("RIGHT")
+                    console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
+                    console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
+                    console.log((p0.x + p0.z))
+                    console.log((-dx - dz))
+                    t = (p0.x + p0.z) / (-dx - dz);     
                 }
                 else if ((out0 & BOTTOM) >= 1) {
+                    console.log("BOTTOM")
                     t = (-p0.y + p0.z) / (dy - dz);
                 }
                 else if ((out0 & TOP) >= 1) {
-                    t = (p0.y + p0.z) / ((-dy) - dz);
+                    console.log("TOP")
+                    t = (p0.y + p0.z) / (-dy - dz);
+                    
                 }
                 else if ((out0 & FAR) >= 1) {
+                    console.log("FAR")
                     t = ((-p0.z) - 1) / (dz);
                 }
                 else { // NEAR
+                    console.log("NEAR")
                     t = (p0.z - z_min) / (-dz);
                 }
 
                 // Use the parametric line equations to update coordinates using the calculated t value
+                console.log("t = " + t);
                 p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 p0.z = ((1 - t) * p0.z) + (t * p1.z);
@@ -529,7 +547,7 @@ function clipLinePerspective(line, z_min) {
                     t = (-p1.y + p1.z) / (dy - dz);
                 }
                 else if ((out1 & TOP) >= 1) {
-                    t = (p1.y + p1.z) / ((-dy) - dz);
+                    t = (p1.y + p1.z) / (-dy - dz);
                 }
                 else if ((out1 & FAR )>= 1) {
                     t = ((-p1.z) - 1) / (dz);
@@ -574,13 +592,11 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            rotateAxisV(-2, scene.view.prp, scene.view.srp, scene.view.vup);
+            scene.view.srp = rotateAxisV(-2, scene.view.prp, scene.view.srp, scene.view.vup);
             break;
         case 39: // RIGHT Arrow
             console.log("right");
-            console.log(scene.view.srp);
             scene.view.srp = rotateAxisV(2, scene.view.prp, scene.view.srp, scene.view.vup);
-            console.log(scene.view.srp);
             break;
         case 65: // A key
             console.log("A");
@@ -598,13 +614,13 @@ function onKeyDown(event) {
             break;
         case 83: // S key
             console.log("S");
-            scene.view.prp.z = scene.view.prp.z - 1;
-            scene.view.srp.z = scene.view.srp.z - 1;
+            scene.view.prp.z = scene.view.prp.z + 1;
+            scene.view.srp.z = scene.view.srp.z + 1;
             break;
         case 87: // W key
             console.log("W");
-            scene.view.prp.z = scene.view.prp.z + 1;
-            scene.view.srp.z = scene.view.srp.z + 1;
+            scene.view.prp.z = scene.view.prp.z - 1;
+            scene.view.srp.z = scene.view.srp.z - 1;
             break;
     }
     drawScene();

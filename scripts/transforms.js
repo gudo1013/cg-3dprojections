@@ -90,9 +90,7 @@ function rotateAxisV(theta, prp, srp, vup){
                     [(v.y*v.x*(1-Math.cos(theta))) + (v.z*Math.sin(theta)), Math.cos(theta) + (Math.pow(v.y,2)*(1-Math.cos(theta))), (v.y*v.z*(1-Math.cos(theta))) - (v.x*Math.sin(theta)) ],
                     [(v.z*v.x*(1-Math.cos(theta))) - (v.y*Math.sin(theta)), (v.z*v.y*(1-Math.cos(theta))) + (v.x*Math.sin(theta)), Math.cos(theta) + (Math.pow(v.z,2)*(1-Math.cos(theta))) ] ]
     let result = mat.mult(srp);
-    console.log(result);
     result = new Vector(result);
-    console.log("after");
     return result;
 
 }
