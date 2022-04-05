@@ -154,6 +154,52 @@ function init() {
             
     };
 
+        //Cone
+    //     scene = {
+    //         view: {
+    //             type: 'perspective',
+    //             prp: Vector3(0, 10, -5),
+    //             srp: Vector3(20, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
+    //             vup: Vector3(1, 1, 0),
+    //             clip: [-12, 6, -12, 6, 10, 100]
+                
+    //         },
+    //          Should call the drawCircle function to get the bse, based on center point, radius,
+    //          and number of sides that we input. We could do the last vertice as the tip of the cone
+    //          and the rest of the points in a loop connect to that last vertice through a loop.
+    //         models: [
+    //             {
+    //                 type: 'generic',
+    //                 vertices: [
+    //                     Vector4(0, 10, -30, 1),
+    //                     Vector4(0,  0, -30, 1),
+    //                     Vector4(10, 0, -30, 1),
+    //                     Vector4(10, 10, -30, 1),
+    //                     Vector4(0, 10, -40, 1),
+    //                     Vector4(0, 0, -40, 1),
+    //                     Vector4(10, 0, -40, 1),
+    //                     Vector4(10, 10, -40, 1)
+    //                 ],
+    //                 edges: [
+    //                     [0, 1, 2, 3, 0],
+    //                     [4, 5, 6, 7, 4],
+    //                     [0, 4],
+    //                     [1, 5],
+    //                     [2, 6],
+    //                     [3, 7]
+    //                 ],
+    //                 animation: {
+    //                     axis: 'x',
+    //                     rps: .5
+    //                 },
+    //                 matrix: new Matrix(4, 4)
+    //             }
+    //         ]
+            
+            
+    // };
+
+
 
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
@@ -161,6 +207,28 @@ function init() {
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
     window.requestAnimationFrame(animate);
+}
+
+
+//This draws a circle with a given center, radius, and the amount of sides on the x y plane
+function drawCircle(center, radius, sides) {
+    for(var i=1; i<=sides; i++) {
+         var phi = this.toRadians((360/sides)*i)
+         var x0 = center.x + (radius * Math.cos(phi));
+         var y0 = center.y + (radius * Math.sin(phi));
+
+         var phi = this.toRadians((360/sides)*(i+1))
+
+         var x1 = center.x + (radius * Math.cos(phi));
+         var y1 = center.y + (radius * Math.sin(phi));
+
+         var p0 = new Point(x0, y0);
+         var p1 = new Point(x1, y1);
+
+
+         this.drawLine(p0.x, p0.y, p1.x, p1.y);
+         
+    }
 }
 
 // Animation loop - repeatedly calls rendering code
