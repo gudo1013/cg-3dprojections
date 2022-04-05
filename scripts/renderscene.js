@@ -249,7 +249,7 @@ function animate(timestamp) {
     for(let i = 0; i < scene.models.length; i++){
         if (scene.models[i].animation != undefined){
 
-            let theta = scene.models[i].animation.rps * 6;
+            let theta = 0//scene.models[i].animation.rps * 6;
             for(let j = 0; j < scene.models[i].vertices.length; j++){
                 switch(scene.models[i].animation.axis){
                     case 'x': 
@@ -291,17 +291,9 @@ function drawScene() {
     // Clear the previous drawn scene
     ctx.clearRect(0, 0, view.width, view.height)
 
-    // Add the offset to the prp and srp in the x direction and negative offset in the y direction to move along the u-axis
-    // Add the offset to the prp and srp in the z direction to move along the n-axis
-    // ------ One concern may be if we load a new scene that the offset does not reset, so may have to actually change the prp and srp directly in the scene ------
-    let newprp = new Vector(scene.view.prp);
-    newprp.x = newprp.x - uoffset;
-    newprp.y = newprp.y + uoffset;
-    newprp.z = newprp.z - noffset;
+    let newprp = new Vector(scene.view.prp);    
     let newsrp = new Vector(scene.view.srp);
-    newsrp.x = newsrp.x - uoffset + voffset;
-    newsrp.y = newsrp.y + uoffset - voffset;
-    newsrp.z = newsrp.z - noffset;
+    
 
     // TODO: implement drawing here!
     // For each model, for each edge
@@ -582,27 +574,37 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            voffset--;
+            rotateAxisV(-2, scene.view.prp, scene.view.srp, scene.view.vup);
             break;
         case 39: // RIGHT Arrow
             console.log("right");
-            voffset++;
+            console.log(scene.view.srp);
+            scene.view.srp = rotateAxisV(2, scene.view.prp, scene.view.srp, scene.view.vup);
+            console.log(scene.view.srp);
             break;
         case 65: // A key
             console.log("A");
-            uoffset--;
+            scene.view.prp.x = scene.view.prp.x + 1;
+            scene.view.prp.y = scene.view.prp.y - 1;
+            scene.view.srp.x = scene.view.srp.x + 1;
+            scene.view.srp.y = scene.view.srp.y - 1;
             break;
         case 68: // D key
             console.log("D");
-            uoffset++;
+            scene.view.prp.x = scene.view.prp.x - 1;
+            scene.view.prp.y = scene.view.prp.y + 1;
+            scene.view.srp.x = scene.view.srp.x - 1;
+            scene.view.srp.y = scene.view.srp.y + 1;
             break;
         case 83: // S key
             console.log("S");
-            noffset--;
+            scene.view.prp.z = scene.view.prp.z - 1;
+            scene.view.srp.z = scene.view.srp.z - 1;
             break;
         case 87: // W key
             console.log("W");
-            noffset++;
+            scene.view.prp.z = scene.view.prp.z + 1;
+            scene.view.srp.z = scene.view.srp.z + 1;
             break;
     }
     drawScene();
