@@ -61,49 +61,98 @@ function init() {
         ]
         
         */
-         scene = {
-             view: {
-                 type: 'perspective',
-                 prp: Vector3(0, 10, -5),
-                 srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
-                 vup: Vector3(1, 1, 0),
-                 clip: [-12, 6, -12, 6, 10, 100]
+
+        //Perspective House:
+    //      scene = {
+    //          view: {
+    //              type: 'perspective',
+    //              prp: Vector3(0, 10, -5),
+    //              srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+    //              vup: Vector3(1, 1, 0),
+    //              clip: [-12, 6, -12, 6, 10, 100]
                 
-             },
-             models: [
-                 {
-                     type: 'generic',
-                     vertices: [
-                         Vector4( 0,  0, -30, 1),
-                         Vector4(20,  0, -30, 1),
-                         Vector4(20, 12, -30, 1),
-                         Vector4(10, 20, -30, 1),
-                         Vector4( 0, 12, -30, 1),
-                         Vector4( 0,  0, -60, 1),
-                         Vector4(20,  0, -60, 1),
-                         Vector4(20, 12, -60, 1),
-                         Vector4(10, 20, -60, 1),
-                         Vector4( 0, 12, -60, 1)
-                     ],
-                     edges: [
-                         [0, 1, 2, 3, 4, 0],
-                         [5, 6, 7, 8, 9, 5],
-                         [0, 5],
-                         [1, 6],
-                         [2, 7],
-                         [3, 8],
-                         [4, 9]
-                     ],
-                     animation: {
-                         axis: 'x',
-                         rps: .5
-                     },
-                     matrix: new Matrix(4, 4)
-                 }
-             ]
+    //          },
+    //          models: [
+    //              {
+    //                  type: 'generic',
+    //                  vertices: [
+    //                      Vector4( 0,  0, -30, 1),
+    //                      Vector4(20,  0, -30, 1),
+    //                      Vector4(20, 12, -30, 1),
+    //                      Vector4(10, 20, -30, 1),
+    //                      Vector4( 0, 12, -30, 1),
+    //                      Vector4( 0,  0, -60, 1),
+    //                      Vector4(20,  0, -60, 1),
+    //                      Vector4(20, 12, -60, 1),
+    //                      Vector4(10, 20, -60, 1),
+    //                      Vector4( 0, 12, -60, 1)
+    //                  ],
+    //                  edges: [
+    //                      [0, 1, 2, 3, 4, 0],
+    //                      [5, 6, 7, 8, 9, 5],
+    //                      [0, 5],
+    //                      [1, 6],
+    //                      [2, 7],
+    //                      [3, 8],
+    //                      [4, 9]
+    //                  ],
+    //                  animation: {
+    //                      axis: 'x',
+    //                      rps: .5
+    //                  },
+    //                  matrix: new Matrix(4, 4)
+    //              }
+    //          ]
             
             
-     };
+    //  };
+
+
+
+    //Parallel House
+    scene = {
+        view: {
+            type: 'parallel',
+            prp: Vector3(10, 10, 0),
+            srp: Vector3(10, 10, -30), //20, 15, -40 original, use -9, 15, -40 for clipping check
+            vup: Vector3(0, 1, 0),
+            clip: [-11, 11, -11, 11, 5, 100]
+           
+        },
+        models: [
+            {
+                type: 'generic',
+                vertices: [
+                    Vector4( 0,  0, -30, 1),
+                    Vector4(20,  0, -30, 1),
+                    Vector4(20, 12, -30, 1),
+                    Vector4(10, 20, -30, 1),
+                    Vector4( 0, 12, -30, 1),
+                    Vector4( 0,  0, -60, 1),
+                    Vector4(20,  0, -60, 1),
+                    Vector4(20, 12, -60, 1),
+                    Vector4(10, 20, -60, 1),
+                    Vector4( 0, 12, -60, 1)
+                ],
+                edges: [
+                    [0, 1, 2, 3, 4, 0],
+                    [5, 6, 7, 8, 9, 5],
+                    [0, 5],
+                    [1, 6],
+                    [2, 7],
+                    [3, 8],
+                    [4, 9]
+                ],
+                animation: {
+                    axis: 'x',
+                    rps: .5
+                },
+                matrix: new Matrix(4, 4)
+            }
+        ]
+       
+       
+};
 
 
         /*
@@ -271,7 +320,7 @@ function animate(timestamp) {
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
     //delayTime(rps);
-    window.requestAnimationFrame(animate);
+    //window.requestAnimationFrame(animate);
 }
 
 function delayTime(rps){
@@ -370,6 +419,80 @@ function drawScene() {
                 }//for element
             }); //forEach edge
         }//if perspective
+        else{
+            // z_min = near/far (from scene clip)
+            let z_min = scene.view.clip[4] / scene.view.clip[5];
+
+            // V matrix for after the Mper transformation to transform vertices to framebuffer units based on canvas size
+            let vmat = new Matrix(4, 4);
+            vmat.values = [ [view.width / 2, 0, 0, view.width / 2],
+                            [0, view.height / 2, 0, view.height / 2],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]];
+
+
+            //-----------TRANSFORM-----------
+
+            // Get the perspective Nper matrix
+            let transformmat = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+
+            // Create a copy of the vertices from the scene so as not to change the original vertices
+            let newvertices = [];
+            
+            // Transform each of the vertices using Nper, ensuring that they are in Vector format
+            for (let i = 0; i < scene.models[modelnum].vertices.length; i++) {
+                newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
+            };
+
+
+            //-----------CLIP---------------
+
+            // Loop through the edge list in the scene models to draw each edge
+            // element = one array in the edge list
+            scene.models[modelnum].edges.forEach(element => {
+                // Loop through the element's edges
+                for (let i = 0; i < element.length - 1; i++) {
+                    //console.log(newvertices[element[i]])
+                    // Created a line for clipping using the corresponding verticies that the edge list is associated with
+                    let line = {
+                        pt0: newvertices[element[i]],
+                        pt1: newvertices[element[i+1]]
+                    };
+                    
+                    // Clip the line and receive a new line with the points to draw
+                    let newline = clipLinePerspective(line, z_min);
+                    //console.log(newline);
+                    // Only draw if the line exists after clipping
+                    if (newline != null) {
+                        
+                        //------------TRANSFORM-------------
+
+                        // Recreate the points in Vector form and readd the w's
+                        point1 = new Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].data[3][0]);
+                        point2 = new Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].data[3][0]);
+                    
+                        // Multiply the points by Mper to get the final transformed vertices of the line
+                        point1 = mat4x4MPar().mult(point1);
+                        point2 = mat4x4MPar().mult(point2);
+
+                        // Translate and scale the line based on canvas side for the framebuffer
+                        point1 = vmat.mult(point1);
+                        point2 = vmat.mult(point2);
+
+                        // Convert to Cartesian coordinates by dividing x and y by the vertex's w coordinate
+                        point1.data[0] = [point1.data[0] / point1.data[3]];
+                        point1.data[1] = [point1.data[1] / point1.data[3]];
+                        point2.data[0]= [point2.data[0] / point2.data[3]];
+                        point2.data[1]= [point2.data[1] / point2.data[3]];
+
+                        // ----------------DRAW LINE------------------ 
+                        
+                        drawLine(point1.data[0], point1.data[1], point2.data[0], point2.data[1]);
+                        
+                    } //if newline
+                }//for element
+            });
+        }
     }//for modelnum
 
 } // function drawScene()
