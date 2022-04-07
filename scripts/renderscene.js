@@ -11,10 +11,6 @@ const FAR = 2;  // binary 000010
 const NEAR = 1;  // binary 000001
 const FLOAT_EPSILON = 0.000001;
 
-let uoffset = 0;
-let noffset = 0;
-let voffset = 0;
-
 // Initialization function - called when web page loads
 function init() {
     let w = 800;
@@ -275,7 +271,7 @@ function animate(timestamp) {
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
     //delayTime(rps);
-    //window.requestAnimationFrame(animate);
+    window.requestAnimationFrame(animate);
 }
 
 function delayTime(rps){
@@ -290,10 +286,6 @@ function drawScene() {
 
     // Clear the previous drawn scene
     ctx.clearRect(0, 0, view.width, view.height)
-
-    let newprp = new Vector(scene.view.prp);    
-    let newsrp = new Vector(scene.view.srp);
-    
 
     // TODO: implement drawing here!
     // For each model, for each edge
@@ -320,7 +312,7 @@ function drawScene() {
             //-----------TRANSFORM-----------
 
             // Get the perspective Nper matrix
-            let transformmat = mat4x4Perspective(newprp, newsrp, scene.view.vup, scene.view.clip);
+            let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
 
             // Create a copy of the vertices from the scene so as not to change the original vertices
             let newvertices = [];
@@ -458,7 +450,7 @@ function clipLinePerspective(line, z_min) {
     let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = outcodePerspective(p0, z_min);
     let out1 = outcodePerspective(p1, z_min);
-    console.log(z_min);
+     
     
     // Check for trivial deny: only enter loop if it is not a deny
     // Compare AND of outcodes, if it is not equal to 0, it is a trivial deny
@@ -470,7 +462,8 @@ function clipLinePerspective(line, z_min) {
         //For parametric line equation
         
 
-        console.log("----------------------------------FIRST--------------------------");
+        // This is purely for a bug that happens when clipping: occasionally will have an infinite loop and can't figure out the reason.
+        let i = 0;
         // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
         while ((out0 | out1) != 0 && result != null) {
 
@@ -488,37 +481,38 @@ function clipLinePerspective(line, z_min) {
 
                 //For the first outcode that it comes across, calculate the corresponding t value
                 if ((out0 & LEFT) >= 1) {
-                    console.log("LEFT")
+                    //console.log("LEFT")
                     t = (-p0.x + p0.z) / (dx - dz);
                 }
                 else if ((out0 & RIGHT) >= 1) {
-                    console.log("RIGHT")
-                    console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
-                    console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
-                    console.log((p0.x + p0.z))
-                    console.log((-dx - dz))
+                    //console.log((out0 & RIGHT))
+                    //console.log("RIGHT")
+                   // console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
+                    //console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
+                    //console.log((p0.x + p0.z))
+                    //console.log((-dx - dz))
                     t = (p0.x + p0.z) / (-dx - dz);     
                 }
                 else if ((out0 & BOTTOM) >= 1) {
-                    console.log("BOTTOM")
+                    //console.log("BOTTOM")
                     t = (-p0.y + p0.z) / (dy - dz);
                 }
                 else if ((out0 & TOP) >= 1) {
-                    console.log("TOP")
+                    //console.log("TOP")
                     t = (p0.y + p0.z) / (-dy - dz);
                     
                 }
                 else if ((out0 & FAR) >= 1) {
-                    console.log("FAR")
+                    //console.log("FAR")
                     t = ((-p0.z) - 1) / (dz);
                 }
                 else { // NEAR
-                    console.log("NEAR")
+                    //console.log("NEAR")
                     t = (p0.z - z_min) / (-dz);
                 }
 
                 // Use the parametric line equations to update coordinates using the calculated t value
-                console.log("t = " + t);
+                //console.log("t = " + t);
                 p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 p0.z = ((1 - t) * p0.z) + (t * p1.z);
@@ -566,11 +560,12 @@ function clipLinePerspective(line, z_min) {
                 
             }//else out1
             // Check for a trivial deny case that could arise after new intersections calculated
-            if((out0 & out1) != 0){
+            if((out0 & out1) != 0 || i >= 7){
                 out0 = 0;
                 out1 = 0;
                 result = null;
             }
+            i++;
         }//while outcodes & != 0
 
         
