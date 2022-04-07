@@ -62,13 +62,13 @@ function init() {
                      },
                      matrix: new Matrix(4, 4)
                  },
-                //  {
-                //     "type": "cube",
-                //     "center": [4, 4, -10],
-                //     "width": 8,
-                //     "height": 8,
-                //     "depth": 8
-                // },
+                 {
+                    type: "cube",
+                    center: [4, 4, -10],
+                    width: 8,
+                    height: 8,
+                    depth: 8
+                },
                 // {
                 //     "type": "cylinder",
                 //     "center": [12, 10, -49],
@@ -207,7 +207,7 @@ function drawScene() {
     //  * clip in 3D
     //  * project to 2D
     //  * draw line
-    for(let i = 0; i< scene.models.length; i++){
+    for(let i = 0; i< scene.models[i].length; i++){
         if(scene.models[i].type == "cube"){
             scene.models[i] = drawCube(scene.models[i]);
         }
@@ -802,9 +802,29 @@ const generic = {
 function drawCube(modelCube){
     const cube = Object.create(generic);
     var center = modelCube.center;
-    
+    var width = modelCube.width;
+    var height = modelCube.height;
+    var depth = modelCube.depth;
 
-    //cube.vertices.push(Vector4())
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front left
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front left
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front right
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front right
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom back left
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + -width/2), 1)); //top back left
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + -width/2), 1)); //top back right
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom back right
+    console.log("Ran");
+
+    cube.edges.push([0, 1, 2, 3, 0],
+                    [4, 5, 6, 7, 4],
+                    [0, 4],
+                    [1, 5],
+                    [2, 6],
+                    [3, 7]);
+
+    drawScene();
+    return cube;
 }
 
 

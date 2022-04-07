@@ -24,6 +24,7 @@ function mat4x4Parallel(prp, srp, vup, clip) {
                         [n.x, n.y, n.z, 0],
                         [0, 0, 0, 1]];
 
+                        
     // 3. shear such that CW is on the z-axis
 
     let shearmat = new Matrix(4, 4);
