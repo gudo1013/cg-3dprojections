@@ -211,12 +211,12 @@ function drawCircle(center, radius, sides) {
     for(var i=1; i<=sides; i++) {
          var phi = this.toRadians((360/sides)*i)
          var x0 = center.x + (radius * Math.cos(phi));
-         var y0 = center.y + (radius * Math.sin(phi));
+         var z0 = center.z + (radius * Math.sin(phi));
 
          var phi = this.toRadians((360/sides)*(i+1))
 
          var x1 = center.x + (radius * Math.cos(phi));
-         var y1 = center.y + (radius * Math.sin(phi));
+         var z1 = center.z + (radius * Math.sin(phi));
 
          var p0 = new Point(x0, y0);
          var p1 = new Point(x1, y1);
