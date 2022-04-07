@@ -22,228 +22,114 @@ function init() {
     ctx = view.getContext('2d');
 
 
-    // initial scene... feel free to change this
-    /*
-    scene = {
-        view: {
-            type: 'perspective',
-            prp: Vector3(44, 20, -16),
-            srp: Vector3(20, 20, -40),
-            vup: Vector3(0, 1, 0),
-            clip: [-19, 5, -10, 8, 12, 100]
-        },
-        models: [
-            {
-                type: 'generic',
-                vertices: [
-                    Vector4(0, 0, -30, 1),
-                    Vector4(20, 0, -30, 1),
-                    Vector4(20, 12, -30, 1),
-                    Vector4(10, 20, -30, 1),
-                    Vector4(0, 12, -30, 1),
-                    Vector4(0, 0, -60, 1),
-                    Vector4(20, 0, -60, 1),
-                    Vector4(20, 12, -60, 1),
-                    Vector4(10, 20, -60, 1),
-                    Vector4(0, 12, -60, 1)
-                ],
-                edges: [
-                    [0, 1, 2, 3, 4, 0],
-                    [5, 6, 7, 8, 9, 5],
-                    [0, 5],
-                    [1, 6],
-                    [2, 7],
-                    [3, 8],
-                    [4, 9]
-                ],
-                matrix: new Matrix(4, 4)
-            }
-        ]
-        
-        */
-
         //Perspective House:
-    //      scene = {
-    //          view: {
-    //              type: 'perspective',
-    //              prp: Vector3(0, 10, -5),
-    //              srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
-    //              vup: Vector3(1, 1, 0),
-    //              clip: [-12, 6, -12, 6, 10, 100]
+         scene = {
+             view: {
+                 type: 'perspective',
+                 prp: Vector3(0, 10, -5),
+                 srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+                 vup: Vector3(1, 1, 0),
+                 clip: [-12, 6, -12, 6, 10, 100]
                 
-    //          },
-    //          models: [
-    //              {
-    //                  type: 'generic',
-    //                  vertices: [
-    //                      Vector4( 0,  0, -30, 1),
-    //                      Vector4(20,  0, -30, 1),
-    //                      Vector4(20, 12, -30, 1),
-    //                      Vector4(10, 20, -30, 1),
-    //                      Vector4( 0, 12, -30, 1),
-    //                      Vector4( 0,  0, -60, 1),
-    //                      Vector4(20,  0, -60, 1),
-    //                      Vector4(20, 12, -60, 1),
-    //                      Vector4(10, 20, -60, 1),
-    //                      Vector4( 0, 12, -60, 1)
-    //                  ],
-    //                  edges: [
-    //                      [0, 1, 2, 3, 4, 0],
-    //                      [5, 6, 7, 8, 9, 5],
-    //                      [0, 5],
-    //                      [1, 6],
-    //                      [2, 7],
-    //                      [3, 8],
-    //                      [4, 9]
-    //                  ],
-    //                  animation: {
-    //                      axis: 'x',
-    //                      rps: .5
-    //                  },
-    //                  matrix: new Matrix(4, 4)
-    //              }
-    //          ]
+             },
+             models: [
+                 {
+                     type: 'generic',
+                     vertices: [
+                         Vector4( 0,  0, -30, 1),
+                         Vector4(20,  0, -30, 1),
+                         Vector4(20, 12, -30, 1),
+                         Vector4(10, 20, -30, 1),
+                         Vector4( 0, 12, -30, 1),
+                         Vector4( 0,  0, -60, 1),
+                         Vector4(20,  0, -60, 1),
+                         Vector4(20, 12, -60, 1),
+                         Vector4(10, 20, -60, 1),
+                         Vector4( 0, 12, -60, 1)
+                     ],
+                     edges: [
+                         [0, 1, 2, 3, 4, 0],
+                         [5, 6, 7, 8, 9, 5],
+                         [0, 5],
+                         [1, 6],
+                         [2, 7],
+                         [3, 8],
+                         [4, 9]
+                     ],
+                     animation: {
+                         axis: 'x',
+                         rps: .5
+                     },
+                     matrix: new Matrix(4, 4)
+                 },
+                //  {
+                //     "type": "cube",
+                //     "center": [4, 4, -10],
+                //     "width": 8,
+                //     "height": 8,
+                //     "depth": 8
+                // },
+                // {
+                //     "type": "cylinder",
+                //     "center": [12, 10, -49],
+                //     "radius": 1.5,
+                //     "height": 5,
+                //     "sides": 12,
+                //     "animation": {
+                //         "axis": "y",
+                //         "rps": 0.5
+                //     }
+                // }
+             ]
             
             
-    //  };
+     };
 
 
 
     //Parallel House
-    scene = {
-        view: {
-            type: 'parallel',
-            prp: Vector3(10, 10, 0),
-            srp: Vector3(10, 10, -30), //20, 15, -40 original, use -9, 15, -40 for clipping check
-            vup: Vector3(0, 1, 0),
-            clip: [-11, 11, -11, 11, 5, 100]
-           
-        },
-        models: [
-            {
-                type: 'generic',
-                vertices: [
-                    Vector4( 0,  0, -30, 1),
-                    Vector4(20,  0, -30, 1),
-                    Vector4(20, 12, -30, 1),
-                    Vector4(10, 20, -30, 1),
-                    Vector4( 0, 12, -30, 1),
-                    Vector4( 0,  0, -60, 1),
-                    Vector4(20,  0, -60, 1),
-                    Vector4(20, 12, -60, 1),
-                    Vector4(10, 20, -60, 1),
-                    Vector4( 0, 12, -60, 1)
-                ],
-                edges: [
-                    [0, 1, 2, 3, 4, 0],
-                    [5, 6, 7, 8, 9, 5],
-                    [0, 5],
-                    [1, 6],
-                    [2, 7],
-                    [3, 8],
-                    [4, 9]
-                ],
-                animation: {
-                    axis: 'x',
-                    rps: .5
-                },
-                matrix: new Matrix(4, 4)
-            }
-        ]
+//     scene = {
+//         view: {
+//             type: 'parallel',
+//             prp: Vector3(10, 10, 0),
+//             srp: Vector3(10, 10, -30), //20, 15, -40 original, use -9, 15, -40 for clipping check
+//             vup: Vector3(0, 1, 0),
+//             clip: [-11, 11, -11, 11, 5, 100]
+//         },
+//         models: [
+//             {
+//                 type: 'generic',
+//                 vertices: [
+//                     Vector4( 0,  0, -30, 1),
+//                     Vector4(20,  0, -30, 1),
+//                     Vector4(20, 12, -30, 1),
+//                     Vector4(10, 20, -30, 1),
+//                     Vector4( 0, 12, -30, 1),
+//                     Vector4( 0,  0, -60, 1),
+//                     Vector4(20,  0, -60, 1),
+//                     Vector4(20, 12, -60, 1),
+//                     Vector4(10, 20, -60, 1),
+//                     Vector4( 0, 12, -60, 1)
+//                 ],
+//                 edges: [
+//                     [0, 1, 2, 3, 4, 0],
+//                     [5, 6, 7, 8, 9, 5],
+//                     [0, 5],
+//                     [1, 6],
+//                     [2, 7],
+//                     [3, 8],
+//                     [4, 9]
+//                 ],
+//                 animation: {
+//                     axis: 'x',
+//                     rps: .5
+//                 },
+//                 matrix: new Matrix(4, 4)
+//             }
+//         ]
        
        
-};
-
-
-        /*
-        //Writing new scenes for new shapes
-        //Cube
-        scene = {
-            view: {
-                type: 'perspective',
-                prp: Vector3(0, 10, -5),
-                srp: Vector3(20, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
-                vup: Vector3(1, 1, 0),
-                clip: [-12, 6, -12, 6, 10, 100]
-                
-            },
-            models: [
-                {
-                    type: 'generic',
-                    vertices: [
-                        Vector4(0, 10, -30, 1),
-                        Vector4(0,  0, -30, 1),
-                        Vector4(10, 0, -30, 1),
-                        Vector4(10, 10, -30, 1),
-                        Vector4(0, 10, -40, 1),
-                        Vector4(0, 0, -40, 1),
-                        Vector4(10, 0, -40, 1),
-                        Vector4(10, 10, -40, 1)
-                    ],
-                    edges: [
-                        [0, 1, 2, 3, 0],
-                        [4, 5, 6, 7, 4],
-                        [0, 4],
-                        [1, 5],
-                        [2, 6],
-                        [3, 7]
-                    ],
-                    animation: {
-                        axis: 'x',
-                        rps: .5
-                    },
-                    matrix: new Matrix(4, 4)
-                }
-            ]
-            */
-            
-    //};
-
-        //Cone
-    //     scene = {
-    //         view: {
-    //             type: 'perspective',
-    //             prp: Vector3(0, 10, -5),
-    //             srp: Vector3(20, 15, -40), //20, 15, -40 original, use -9, 15, -40 for clipping check
-    //             vup: Vector3(1, 1, 0),
-    //             clip: [-12, 6, -12, 6, 10, 100]
-                
-    //         },
-    //          Should call the drawCircle function to get the bse, based on center point, radius,
-    //          and number of sides that we input. We could do the last vertice as the tip of the cone
-    //          and the rest of the points in a loop connect to that last vertice through a loop.
-    //         models: [
-    //             {
-    //                 type: 'generic',
-    //                 vertices: [
-    //                     Vector4(0, 10, -30, 1),
-    //                     Vector4(0,  0, -30, 1),
-    //                     Vector4(10, 0, -30, 1),
-    //                     Vector4(10, 10, -30, 1),
-    //                     Vector4(0, 10, -40, 1),
-    //                     Vector4(0, 0, -40, 1),
-    //                     Vector4(10, 0, -40, 1),
-    //                     Vector4(10, 10, -40, 1)
-    //                 ],
-    //                 edges: [
-    //                     [0, 1, 2, 3, 0],
-    //                     [4, 5, 6, 7, 4],
-    //                     [0, 4],
-    //                     [1, 5],
-    //                     [2, 6],
-    //                     [3, 7]
-    //                 ],
-    //                 animation: {
-    //                     axis: 'x',
-    //                     rps: .5
-    //                 },
-    //                 matrix: new Matrix(4, 4)
-    //             }
-    //         ]
-            
-            
-    // };
-
+// };
 
 
     // event handler for pressing arrow keys
@@ -254,27 +140,6 @@ function init() {
     window.requestAnimationFrame(animate);
 }
 
-
-//This draws a circle with a given center, radius, and the amount of sides on the x y plane
-function drawCircle(center, radius, sides) {
-    for(var i=1; i<=sides; i++) {
-         var phi = this.toRadians((360/sides)*i)
-         var x0 = center.x + (radius * Math.cos(phi));
-         var z0 = center.z + (radius * Math.sin(phi));
-
-         var phi = this.toRadians((360/sides)*(i+1))
-
-         var x1 = center.x + (radius * Math.cos(phi));
-         var z1 = center.z + (radius * Math.sin(phi));
-
-         var p0 = new Point(x0, y0);
-         var p1 = new Point(x1, y1);
-
-
-         this.drawLine(p0.x, p0.y, p1.x, p1.y);
-         
-    }
-}
 
 // Animation loop - repeatedly calls rendering code
 function animate(timestamp) {
@@ -342,6 +207,14 @@ function drawScene() {
     //  * clip in 3D
     //  * project to 2D
     //  * draw line
+    for(let i = 0; i< scene.models.length; i++){
+        if(scene.models[i].type == "cube"){
+            scene.models[i] = drawCube(scene.models[i]);
+        }
+        if(scene.models[i].type == "cylinder"){
+            scene.models[i] = drawCube(scene.models[i]);
+        }
+    }
 
     // Loop through all models
     for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
@@ -397,7 +270,7 @@ function drawScene() {
                         point1 = new Vector4(newline.pt0.x, newline.pt0.y, newline.pt0.z, newvertices[i].data[3][0]);
                         point2 = new Vector4(newline.pt1.x, newline.pt1.y, newline.pt1.z, newvertices[i+1].data[3][0]);
                     
-                        // Multiply the points by Mper to get the final transformed vertices of the line
+                        // Multiply the points by Mpar to get the final transformed vertices of the line
                         point1 = mat4x4MPer().mult(point1);
                         point2 = mat4x4MPer().mult(point2);
 
@@ -419,6 +292,7 @@ function drawScene() {
                 }//for element
             }); //forEach edge
         }//if perspective
+
         else{
             // z_min = near/far (from scene clip)
             let z_min = scene.view.clip[4] / scene.view.clip[5];
@@ -460,7 +334,7 @@ function drawScene() {
                     };
                     
                     // Clip the line and receive a new line with the points to draw
-                    let newline = clipLinePerspective(line, z_min);
+                    let newline = clipLineParallel(line);
                     //console.log(newline);
                     // Only draw if the line exists after clipping
                     if (newline != null) {
@@ -560,7 +434,129 @@ function clipLineParallel(line) {
     let out1 = outcodeParallel(p1);
 
     // TODO: implement clipping here!
+    if ((out0 & out1) == 0) {
 
+        // Loop until trivial accept, if the line is already entirely in the view plane, skip the loop
+        result = line;
+
+        //For parametric line equation
+        
+
+        // This is purely for a bug that happens when clipping: occasionally will have an infinite loop and can't figure out the reason.
+        let i = 0;
+        // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
+        while ((out0 | out1) != 0 && result != null) {
+
+            //console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
+            //console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
+            let t;
+
+            // Check for first point being outside
+            if (out0 != 0) {
+
+                //Change in x, y, and z
+                let dx = p1.x - p0.x;
+                let dy = p1.y - p0.y;
+                let dz = p1.z - p0.z;
+
+                //For the first outcode that it comes across, calculate the corresponding t value
+                if ((out0 & LEFT) >= 1) {
+                    //console.log("LEFT")
+                    t = (-p0.x + p0.z) / (dx - dz);
+                }
+                else if ((out0 & RIGHT) >= 1) {
+                    //console.log((out0 & RIGHT))
+                    //console.log("RIGHT")
+                   // console.log("x0 = " + p0.x + ", y0 = " + p0.y + ", z0 = " + p0.z);
+                    //console.log("x1 = " + p1.x + ", y1 = " + p1.y + ", z1 = " + p1.z);
+                    //console.log((p0.x + p0.z))
+                    //console.log((-dx - dz))
+                    t = (p0.x + p0.z) / (-dx - dz);     
+                }
+                else if ((out0 & BOTTOM) >= 1) {
+                    //console.log("BOTTOM")
+                    t = (-p0.y + p0.z) / (dy - dz);
+                }
+                else if ((out0 & TOP) >= 1) {
+                    //console.log("TOP")
+                    t = (p0.y + p0.z) / (-dy - dz);
+                    
+                }
+                else if ((out0 & FAR) >= 1) {
+                    //console.log("FAR")
+                    t = ((-p0.z) - 1) / (dz);
+                }
+                else { // NEAR
+                    //console.log("NEAR")
+                    t = (p0.z - z_min) / (-dz);
+                }
+
+                // Use the parametric line equations to update coordinates using the calculated t value
+                //console.log("t = " + t);
+                p0.x = ((1 - t) * p0.x) + (t * p1.x);
+                p0.y = ((1 - t) * p0.y) + (t * p1.y);
+                p0.z = ((1 - t) * p0.z) + (t * p1.z);
+
+                // Recalculate the outcode using the updated coordinates
+                out0 = outcodePerspective(p0, z_min);
+            }// if out1
+
+            // Second point is not inside
+            else {
+
+                // Change in x, y, and z
+                let dx = p0.x - p1.x;
+                let dy = p0.y - p1.y;
+                let dz = p0.z - p1.z;
+
+                // For the first outcode that it comes across, calculate the corresponding t value
+                // Outcode is bitwise AND with each bit representation
+                if ((out1 & LEFT) >= 1) {
+                    t = (-p1.x + p1.z) / (dx - dz);
+                }
+                else if ((out1 & RIGHT) >= 1) {
+                    t = (p1.x + p1.z) / (-dx - dz);
+                }
+                else if ((out1 & BOTTOM) >= 1) {
+                    t = (-p1.y + p1.z) / (dy - dz);
+                }
+                else if ((out1 & TOP) >= 1) {
+                    t = (p1.y + p1.z) / (-dy - dz);
+                }
+                else if ((out1 & FAR )>= 1) {
+                    t = ((-p1.z) - 1) / (dz);
+                }
+                else { // NEAR
+                    t = (p1.z - z_min) / (-dz);
+                }
+
+                //Use the parametric line equations to update coordinates using the calculated t value
+                p1.x = ((1 - t) * p1.x) + (t * p0.x);
+                p1.y = ((1 - t) * p1.y) + (t * p0.y);
+                p1.z = ((1 - t) * p1.z) + (t * p0.z);
+
+                //Recalculate the outcode using the updated coordinates
+                out1 = outcodePerspective(p1, z_min);
+                
+            }//else out1
+            // Check for a trivial deny case that could arise after new intersections calculated
+            if((out0 & out1) != 0 || i >= 7){
+                out0 = 0;
+                out1 = 0;
+                result = null;
+            }
+            i++;
+        }//while outcodes & != 0
+
+        
+        //Set the coordinates of the new line with intersection points to the result if the result is not null
+        if(result != null){
+            result.pt0 = p0;
+            result.pt1 = p1;
+        }
+    }//if outcodes == 0
+
+    // Either null or a line
     return result;
 }
 
@@ -793,4 +789,46 @@ function drawLine(x1, y1, x2, y2) {
     ctx.fillStyle = '#FF0000';
     ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
     ctx.fillRect(x2 - 2, y2 - 2, 4, 4);
+}
+
+
+const generic = {
+    type: "generic",
+    vertices:[],
+    edges: [],
+    matrix: new Matrix(4, 4)
+}
+
+function drawCube(modelCube){
+    const cube = Object.create(generic);
+    var center = modelCube.center;
+    
+
+    //cube.vertices.push(Vector4())
+}
+
+
+function toRadians(degrees){
+    return degrees* Math.PI/180;
+}
+
+//This draws a circle with a given center, radius, and the amount of sides on the x y plane
+function drawCircle(center, radius, sides) {
+    for(var i=1; i<=sides; i++) {
+         var phi = this.toRadians((360/sides)*i)
+         var x0 = center.x + (radius * Math.cos(phi));
+         var z0 = center.z + (radius * Math.sin(phi));
+
+         var phi = this.toRadians((360/sides)*(i+1))
+
+         var x1 = center.x + (radius * Math.cos(phi));
+         var z1 = center.z + (radius * Math.sin(phi));
+
+         var p0 = new Point(x0, y0);
+         var p1 = new Point(x1, y1);
+
+
+         this.drawLine(p0.x, p0.y, p1.x, p1.y);
+         
+    }
 }

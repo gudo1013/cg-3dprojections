@@ -8,8 +8,10 @@ function mat4x4Parallel(prp, srp, vup, clip) {
     let v = n.cross(u);
 
     //CW and DOP
-    let cw = new Vector3((clip[0]+clip[1])/2, (clip[2]+clip[3])/2, -clip[4]);
-    let dop = new Vector3((0, 0, 0)); //dop = cw - prp, but prp is at origin in VRC
+    //let cw = new Vector3((clip[0]+clip[1])/2, (clip[2]+clip[3])/2, -clip[4]);
+    //let cw = new Vector3(10000, 100000, 1000);
+    let dop = new Vector3(0, 0, 1);
+    //dop = cw - prp, but prp is at origin in VRC
 
     // 1. translate PRP to origin
     let translatemat1 = new Matrix(4, 4);
@@ -29,7 +31,10 @@ function mat4x4Parallel(prp, srp, vup, clip) {
 
     // 4. translate near clipping plane to origin
     let translatemat2 = new Matrix(4, 4);
-    Mat4x4Translate(translatemat2, 0, 0, clip[4]);
+    translatemat2.values = [[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, clip[4]],
+                            [0, 0, 0, 1]];
 
     // 5. scale such that view volume bounds are ([-1,1], [-1,1], [-1,0])
     let scalemat = new Matrix(4, 4);
