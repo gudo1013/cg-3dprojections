@@ -792,11 +792,13 @@ function drawLine(x1, y1, x2, y2) {
 }
 
 
-const generic = {
+function generic() {
+    return {
     type: "generic",
-    vertices:[],
+    vertices: [],
     edges: [],
     matrix: new Matrix(4, 4)
+    }
 }
 
 function drawCube(modelCube){
@@ -810,10 +812,10 @@ function drawCube(modelCube){
     cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front left
     cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front right
     cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front right
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom back left
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + -width/2), 1)); //top back left
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + -width/2), 1)); //top back right
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom back right
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back left
+    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + width/2), 1)); //top back left
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + width/2), 1)); //top back right
+    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back right
     console.log("Ran");
 
     cube.edges.push([0, 1, 2, 3, 0],
