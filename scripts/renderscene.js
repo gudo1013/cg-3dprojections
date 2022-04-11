@@ -137,7 +137,7 @@ function init() {
 
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
-    window.requestAnimationFrame(animate);
+    //window.requestAnimationFrame(animate);
 }
 
 
@@ -145,7 +145,6 @@ function init() {
 function animate(timestamp) {
     // step 1: calculate time (time since start)
     let time = timestamp - start_time;
-    let seconds = time/1000;
 
     //What if we did something with taking the calculation of 1000 milleseconds,
     //and delaying the for loop to run so it only happens every 1/60th of a
@@ -182,10 +181,15 @@ function animate(timestamp) {
     // step 3: draw scene
     drawScene();
 
+
     // step 4: request next animation frame (recursively calling same function)
     // (may want to leave commented out while debugging initially)
     //delayTime(rps);
     //window.requestAnimationFrame(animate);
+
+    // setTimeout(() => {
+    //     window.requestAnimationFrame(animate);
+    // }, 10);
 }
 
 function delayTime(rps){
@@ -207,13 +211,16 @@ function drawScene() {
     //  * clip in 3D
     //  * project to 2D
     //  * draw line
-    for(let i = 0; i< scene.models[i].length; i++){
+
+    //Draw all scene models necessary.
+    for(let i = 0; i < scene.models.length; i++){
         if(scene.models[i].type == "cube"){
             scene.models[i] = drawCube(scene.models[i]);
         }
         if(scene.models[i].type == "cylinder"){
             scene.models[i] = drawCube(scene.models[i]);
         }
+        console.log(i);
     }
 
     // Loop through all models
@@ -802,21 +809,23 @@ function generic() {
 }
 
 function drawCube(modelCube){
-    const cube = Object.create(generic);
+    var cube = generic();
+    cube.vertices = [];
+    cube.edges = [];
     var center = modelCube.center;
     var width = modelCube.width;
     var height = modelCube.height;
     var depth = modelCube.depth;
 
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front left
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front left
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + -width/2), 1)); //top front right
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front right
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back left
-    cube.vertices.push(Vector4((center.x + -length/2), (center.y + height/2), (center.z + width/2), 1)); //top back left
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + height/2), (center.z + width/2), 1)); //top back right
-    cube.vertices.push(Vector4((center.x + length/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back right
-    console.log("Ran");
+    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front left
+    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + height/2), (center.z + -width/2), 1)); //top front left
+    cube.vertices.push(Vector4((center.x + depth/2), (center.y + height/2), (center.z + -width/2), 1)); //top front right
+    cube.vertices.push(Vector4((center.x + depth/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front right
+    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back left
+    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + height/2), (center.z + width/2), 1)); //top back left
+    cube.vertices.push(Vector4((center.x + depth/2), (center.y + height/2), (center.z + width/2), 1)); //top back right
+    cube.vertices.push(Vector4((center.x + depth/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back right
+    //console.log("Ran");
 
     cube.edges.push([0, 1, 2, 3, 0],
                     [4, 5, 6, 7, 4],
