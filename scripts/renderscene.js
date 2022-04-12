@@ -71,15 +71,26 @@ function init() {
                 },
                 {
                     type: "cone",
-                    base: [12, 10, -49],
-                    radius: 2,
-                    height: 5,
-                    sides: 12,
+                    base: [-18, 25, -49],
+                    radius: 5,
+                    height: 10,
+                    sides: 20,
                     animation: {
                         axis: "y",
                         rps: 0.5
                     }
-                }
+                },
+                // {
+                //     type: "cylinder",
+                //     center: [12, 10, -49],
+                //     radius: 2,
+                //     height: 5,
+                //     sides: 12,
+                //     animation: {
+                //         "axis": "y",
+                //         "rps": 0.5
+                //     }
+                // }
              ]
             
             
@@ -90,11 +101,11 @@ function init() {
     //Parallel House
 //     scene = {
 //         view: {
-//             type: 'parallel',
-//             prp: Vector3(10, 10, 0),
-//             srp: Vector3(10, 10, -30), //20, 15, -40 original, use -9, 15, -40 for clipping check
-//             vup: Vector3(0, 1, 0),
-//             clip: [-11, 11, -11, 11, 5, 100]
+//             type: "parallel",
+//             prp: [0, 0, 10],
+//             srp: [0, 0, 0],
+//             vup: [0, 1, 0],
+//             clip: [-4, 20, -1, 17, 5, 75]
 //         },
 //         models: [
 //             {
@@ -216,11 +227,11 @@ function drawScene() {
         if(scene.models[i].type == "cube"){
             scene.models[i] = drawCube(scene.models[i]);
         }
-        if(scene.models[i].type == "cylinder"){
-            scene.models[i] = drawCylinder(scene.models[i]);
-        }
         if(scene.models[i].type == "cone"){
             scene.models[i] = drawCone(scene.models[i]);
+        }
+        if(scene.models[i].type == "cylinder"){
+            scene.models[i] = drawCylinder(scene.models[i]);
         }
         console.log(i);
     }
@@ -242,6 +253,8 @@ function drawScene() {
 
             //-----------TRANSFORM-----------
 
+            console.log("This should run thrice");
+
             // Get the perspective Nper matrix
             let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
 
@@ -254,7 +267,7 @@ function drawScene() {
             };
 
 
-            console.log("This should run thrice");
+            
             
 
             //-----------CLIP---------------
@@ -818,8 +831,6 @@ function generic() {
 
 function drawCube(modelCube){
     var cube = generic();
-    cube.vertices = [];
-    cube.edges = [];
     var center = modelCube.center;
     var width = modelCube.width;
     var height = modelCube.height;
@@ -848,8 +859,6 @@ function drawCube(modelCube){
 
 function drawCone(modelCone){
     var cone = generic();
-    cone.vertices = [];
-    cone.edges = [];
     var center = modelCone.base;
     var radius = modelCone.radius;
     var height = modelCone.height;
@@ -857,37 +866,62 @@ function drawCone(modelCone){
 
     cone.vertices.push(Vector4(center[0], (center[1] + height), center[2], 1));
 
+    //cone.edges.push(0, 1);
+
+    var phi = this.toRadians((360/sides)* 0);
+    var x0 = center[0] + (radius * Math.cos(phi));
+    var z0 = center[2] + (radius * Math.sin(phi));
+    cone.vertices.push(Vector4(x0, center[1], z0, 1));
+
     cone.edges.push(0, 1);
 
-    var phi = this.toRadians((360/sides)* 1);
-        var x0 = center[0] + (radius * Math.cos(phi));
-        var z0 = center[2] + (radius * Math.sin(phi));
-
-        cone.vertices.push(Vector4(x0, center[1], z0, 1));
-
-    for(var i=2; i<=sides; i++) {
+    for(var i=1; i<=sides; i++) {
         var phi = this.toRadians((360/sides)*i)
         var x0 = center[0] + (radius * Math.cos(phi));
         var z0 = center[2] + (radius * Math.sin(phi));
 
         cone.vertices.push(Vector4(x0, center[1], z0, 1));
 
-        // var phi = this.toRadians((360/sides)*(i+1))
-
-        // var x1 = center[0] + (radius * Math.cos(phi));
-        // var z1 = center[2] + (radius * Math.sin(phi));
-
-        // cone.vertices.push(Vector4(x1, center[1], z1, 1));
-
-        cone.edges.push(0, i);
-        cone.edges.push((i-1), (i));
+        cone.edges.push([0, i]);
+        cone.edges.push([(i-1), (i)]);
         console.log("Cone ran!");
-
+        if(i == sides){
+            cone.edges.push([i, 1]);
+        }
     }
 
     return cone;
 }
 
+
+function drawCylinder(modelCylinder){
+    var cylinder = generic();
+    var center = modelCylinder.center;
+    var radius = modelCylinder.radius;
+    var height = modelCylinder.height;
+    var sides = modelCylinder.sides;
+
+
+    var phi = this.toRadians((360/sides)* 0);
+    var x0 = center[0] + (radius * Math.cos(phi));
+    var z0 = center[2] + (radius * Math.sin(phi));
+
+    cylinder.vertices.push(Vector4(x0, center[1], z0, 1));
+
+    for(var i=1; i<=sides; i++) {
+        var phi = this.toRadians((360/sides)*i);
+        var x0 = center[0] + (radius * Math.cos(phi));
+        var z0 = center[2] + (radius * Math.sin(phi));
+
+        cylinder.vertices.push(Vector4(x0, center[1], z0, 1));
+
+        cylinder.edges.push([0, i]);
+        console.log("Cylinder ran!");
+        if(i == sides){
+            cylinder.edges.push([i, 0]);
+        }
+    }
+}
 
 
 function toRadians(degrees){
