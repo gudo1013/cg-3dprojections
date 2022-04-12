@@ -23,13 +23,14 @@ function init() {
 
     
         //Perspective House:
+        /*
          scene = {
              view: {
                  type: 'perspective',
                  prp: Vector3(0, 10, -5),
                  srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
                  vup: Vector3(1, 1, 0),
-                 clip: [-12, 6, -12, 6, 10, 500]
+                 clip: [-12, 6, -12, 6, 10, 100]
                 
              },
              models: [
@@ -58,7 +59,7 @@ function init() {
                      ],
                      animation: {
                          axis: 'x',
-                         rps: 5
+                         rps: .5
                      },
                      matrix: new Matrix(4, 4)
                  }/*,
@@ -90,12 +91,13 @@ function init() {
                         axis: "y",
                         rps: 0.5
                     }
-                }*/
+                }
              ]
             
             
      };
-     /*
+     */
+     
 
 
     //Parallel House
@@ -103,9 +105,9 @@ function init() {
          view: {
              type: "parallel",
              prp: [0, 0, 10],
-             srp: [0, 0, 0],
+             srp: [1, 0, 0],
              vup: [0, 1, 0],
-             clip: [-4, 20, -1, 17, 5, 75]
+             clip: [-4, 50, -1, 50, 5, 75]
          },
          models: [
              {
@@ -141,7 +143,7 @@ function init() {
        
        
  };
- */
+ 
 
     // Ensure prp, srp, and vup are all vectors
     if(scene.view.prp.x == undefined || scene.view.srp.x == undefined || scene.view.vup.x == undefined){
@@ -155,8 +157,8 @@ function init() {
     let displayRate = 7 * (1/this.rps);
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
-    //animate(performance.now());
-    drawScene();
+    animate(performance.now());
+    //drawScene();
 }
 
 
@@ -176,8 +178,7 @@ function animate(timestamp) {
     let rotatemat = new Matrix(4,4);
     for(let i = 0; i < scene.models.length; i++){
         if (scene.models[i].animation != undefined){
-
-            let theta = 3//scene.models[i].animation.rps * 6;
+            let theta = 1//scene.models[i].animation.rps * 6;
             for(let j = 0; j < scene.models[i].vertices.length; j++){
                 switch(scene.models[i].animation.axis){
                     case 'x': 
@@ -208,7 +209,7 @@ function animate(timestamp) {
     //     window.requestAnimationFrame(animate);
     // }, this.displayRate);
 
-    console.log("Testing");
+    //console.log("Testing");
 
 }
 
@@ -261,7 +262,7 @@ function drawScene() {
 
             //-----------TRANSFORM-----------
 
-            console.log("Modelnum: " + modelnum);
+            //console.log("Modelnum: " + modelnum);
 
             // Get the perspective Nper matrix
             let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
@@ -328,9 +329,7 @@ function drawScene() {
         }//if perspective
 
         else if(scene.view.type == 'parallel'){
-            // z_min = near/far (from scene clip)
-            let z_min = scene.view.clip[4] / scene.view.clip[5];
-
+            
             // V matrix for after the Mper transformation to transform vertices to framebuffer units based on canvas size
             let vmat = new Matrix(4, 4);
             vmat.values = [ [view.width / 2, 0, 0, view.width / 2],
@@ -473,8 +472,8 @@ function clipLineParallel(line) {
         // Loop until trivial accept, if the line is already entirely in the view plane, skip the loop
         result = line;
 
-        //For parametric line equation
-        
+        console.log('out0 ' + out0);
+        console.log('out1 ' + out1);
 
         // This is purely for a bug that happens when clipping: occasionally will have an infinite loop and can't figure out the reason.
         let i = 0;
@@ -724,17 +723,17 @@ function onKeyDown(event) {
             break;
         case 65: // A key
             console.log("A");
-            scene.view.prp.x = scene.view.prp.x + 1;
-            scene.view.prp.y = scene.view.prp.y - 1;
-            scene.view.srp.x = scene.view.srp.x + 1;
-            scene.view.srp.y = scene.view.srp.y - 1;
+            scene.view.prp.x = scene.view.prp.x + scene.view.vup.y;
+            scene.view.prp.y = scene.view.prp.y - scene.view.vup.x;
+            scene.view.srp.x = scene.view.srp.x + scene.view.vup.y;
+            scene.view.srp.y = scene.view.srp.y - scene.view.vup.x;
             break;
         case 68: // D key
             console.log("D");
-            scene.view.prp.x = scene.view.prp.x - 1;
-            scene.view.prp.y = scene.view.prp.y + 1;
-            scene.view.srp.x = scene.view.srp.x - 1;
-            scene.view.srp.y = scene.view.srp.y + 1;
+            scene.view.prp.x = scene.view.prp.x - scene.view.vup.y;
+            scene.view.prp.y = scene.view.prp.y + scene.view.vup.x;
+            scene.view.srp.x = scene.view.srp.x - scene.view.vup.y;
+            scene.view.srp.y = scene.view.srp.y + scene.view.vup.x;
             break;
         case 83: // S key
             console.log("S");

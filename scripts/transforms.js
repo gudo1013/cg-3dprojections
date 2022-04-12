@@ -1,8 +1,7 @@
 // create a 4x4 matrix to the parallel projection / view matrix
 function mat4x4Parallel(prp, srp, vup, clip) {
-    
+
     //Get VRC coordinates
-    console.log(prp);
     let n = prp.subtract(srp);
     n.normalize();
     let u = vup.cross(n);
