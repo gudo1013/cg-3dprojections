@@ -69,17 +69,17 @@ function init() {
                     height: 10,
                     depth: 10
                 },
-                // {
-                //     "type": "cylinder",
-                //     "center": [12, 10, -49],
-                //     "radius": 1.5,
-                //     "height": 5,
-                //     "sides": 12,
-                //     "animation": {
-                //         "axis": "y",
-                //         "rps": 0.5
-                //     }
-                // }
+                {
+                    type: "cone",
+                    base: [12, 10, -49],
+                    radius: 2,
+                    height: 5,
+                    sides: 12,
+                    animation: {
+                        axis: "y",
+                        rps: 0.5
+                    }
+                }
              ]
             
             
@@ -138,7 +138,8 @@ function init() {
     let displayRate = 7 * (1/this.rps);
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
-    animate(performance.now(), .1);
+    //animate(performance.now());
+    drawScene();
 }
 
 
@@ -216,7 +217,10 @@ function drawScene() {
             scene.models[i] = drawCube(scene.models[i]);
         }
         if(scene.models[i].type == "cylinder"){
-            scene.models[i] = drawCube(scene.models[i]);
+            scene.models[i] = drawCylinder(scene.models[i]);
+        }
+        if(scene.models[i].type == "cone"){
+            scene.models[i] = drawCone(scene.models[i]);
         }
         console.log(i);
     }
@@ -250,7 +254,7 @@ function drawScene() {
             };
 
 
-            console.log("This should run twice");
+            console.log("This should run thrice");
             
 
             //-----------CLIP---------------
@@ -829,7 +833,7 @@ function drawCube(modelCube){
     cube.vertices.push(Vector4((center[0] + -depth/2), (center[1] + height/2), (center[2] + width/2), 1)); //top back left
     cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + height/2), (center[2] + width/2), 1)); //top back right
     cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + -height/2), (center[2] + width/2), 1)); //bottom back right
-    console.log("Ran");
+    console.log("Cube ran");
 
     cube.edges.push([0, 1, 2, 3, 0]);
     cube.edges.push([4, 5, 6, 7, 4]);
@@ -840,6 +844,50 @@ function drawCube(modelCube){
 
     return cube;
 }
+
+
+function drawCone(modelCone){
+    var cone = generic();
+    cone.vertices = [];
+    cone.edges = [];
+    var center = modelCone.base;
+    var radius = modelCone.radius;
+    var height = modelCone.height;
+    var sides = modelCone.sides;
+
+    cone.vertices.push(Vector4(center[0], (center[1] + height), center[2], 1));
+
+    cone.edges.push(0, 1);
+
+    var phi = this.toRadians((360/sides)* 1);
+        var x0 = center[0] + (radius * Math.cos(phi));
+        var z0 = center[2] + (radius * Math.sin(phi));
+
+        cone.vertices.push(Vector4(x0, center[1], z0, 1));
+
+    for(var i=2; i<=sides; i++) {
+        var phi = this.toRadians((360/sides)*i)
+        var x0 = center[0] + (radius * Math.cos(phi));
+        var z0 = center[2] + (radius * Math.sin(phi));
+
+        cone.vertices.push(Vector4(x0, center[1], z0, 1));
+
+        // var phi = this.toRadians((360/sides)*(i+1))
+
+        // var x1 = center[0] + (radius * Math.cos(phi));
+        // var z1 = center[2] + (radius * Math.sin(phi));
+
+        // cone.vertices.push(Vector4(x1, center[1], z1, 1));
+
+        cone.edges.push(0, i);
+        cone.edges.push((i-1), (i));
+        console.log("Cone ran!");
+
+    }
+
+    return cone;
+}
+
 
 
 function toRadians(degrees){
