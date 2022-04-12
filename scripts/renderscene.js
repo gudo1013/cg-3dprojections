@@ -29,7 +29,7 @@ function init() {
                  prp: Vector3(0, 10, -5),
                  srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
                  vup: Vector3(1, 1, 0),
-                 clip: [-12, 6, -12, 6, 10, 100]
+                 clip: [-12, 6, -12, 6, 10, 500]
                 
              },
              models: [
@@ -58,16 +58,16 @@ function init() {
                      ],
                      animation: {
                          axis: 'x',
-                         rps: .5
+                         rps: 5
                      },
                      matrix: new Matrix(4, 4)
                  },
                  {
                     type: "cube",
-                    center: [4, 4, -10],
-                    width: 8,
-                    height: 8,
-                    depth: 8
+                    center: [-15, 15, -50],
+                    width: 10,
+                    height: 10,
+                    depth: 10
                 },
                 // {
                 //     "type": "cylinder",
@@ -135,9 +135,10 @@ function init() {
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
 
+    let displayRate = 7 * (1/this.rps);
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
-    //window.requestAnimationFrame(animate);
+    animate(performance.now(), .1);
 }
 
 
@@ -158,7 +159,7 @@ function animate(timestamp) {
     for(let i = 0; i < scene.models.length; i++){
         if (scene.models[i].animation != undefined){
 
-            let theta = 1//scene.models[i].animation.rps * 6;
+            let theta = 3//scene.models[i].animation.rps * 6;
             for(let j = 0; j < scene.models[i].vertices.length; j++){
                 switch(scene.models[i].animation.axis){
                     case 'x': 
@@ -173,11 +174,9 @@ function animate(timestamp) {
                 }
                 scene.models[i].vertices[j] = new Vector(rotatemat.mult(scene.models[i].vertices[j]));
             }
-            
         }
     }
     
-
     // step 3: draw scene
     drawScene();
 
@@ -189,11 +188,10 @@ function animate(timestamp) {
 
     // setTimeout(() => {
     //     window.requestAnimationFrame(animate);
-    // }, 10);
-}
+    // }, this.displayRate);
 
-function delayTime(rps){
-    setTimeout(1000/(60*rps));
+    console.log("Testing");
+
 }
 
 
@@ -250,7 +248,11 @@ function drawScene() {
             for (let i = 0; i < scene.models[modelnum].vertices.length; i++) {
                 newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
             };
+
+
+            console.log("This should run twice");
             
+
             //-----------CLIP---------------
 
             // Loop through the edge list in the scene models to draw each edge
@@ -796,6 +798,8 @@ function drawLine(x1, y1, x2, y2) {
     ctx.fillStyle = '#FF0000';
     ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
     ctx.fillRect(x2 - 2, y2 - 2, 4, 4);
+
+    console.log("Loopdiedo");
 }
 
 
@@ -817,24 +821,23 @@ function drawCube(modelCube){
     var height = modelCube.height;
     var depth = modelCube.depth;
 
-    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front left
-    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + height/2), (center.z + -width/2), 1)); //top front left
-    cube.vertices.push(Vector4((center.x + depth/2), (center.y + height/2), (center.z + -width/2), 1)); //top front right
-    cube.vertices.push(Vector4((center.x + depth/2), (center.y + -height/2), (center.z + -width/2), 1)); //bottom front right
-    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back left
-    cube.vertices.push(Vector4((center.x + -depth/2), (center.y + height/2), (center.z + width/2), 1)); //top back left
-    cube.vertices.push(Vector4((center.x + depth/2), (center.y + height/2), (center.z + width/2), 1)); //top back right
-    cube.vertices.push(Vector4((center.x + depth/2), (center.y + -height/2), (center.z + width/2), 1)); //bottom back right
-    //console.log("Ran");
+    cube.vertices.push(Vector4((center[0] + -depth/2), (center[1] + -height/2), (center[2] + -width/2), 1)); //bottom front left
+    cube.vertices.push(Vector4((center[0] + -depth/2), (center[1] + height/2), (center[2] + -width/2), 1)); //top front left
+    cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + height/2), (center[2] + -width/2), 1)); //top front right
+    cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + -height/2), (center[2] + -width/2), 1)); //bottom front right
+    cube.vertices.push(Vector4((center[0] + -depth/2), (center[1] + -height/2), (center[2] + width/2), 1)); //bottom back left
+    cube.vertices.push(Vector4((center[0] + -depth/2), (center[1] + height/2), (center[2] + width/2), 1)); //top back left
+    cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + height/2), (center[2] + width/2), 1)); //top back right
+    cube.vertices.push(Vector4((center[0] + depth/2), (center[1] + -height/2), (center[2] + width/2), 1)); //bottom back right
+    console.log("Ran");
 
-    cube.edges.push([0, 1, 2, 3, 0],
-                    [4, 5, 6, 7, 4],
-                    [0, 4],
-                    [1, 5],
-                    [2, 6],
-                    [3, 7]);
+    cube.edges.push([0, 1, 2, 3, 0]);
+    cube.edges.push([4, 5, 6, 7, 4]);
+    cube.edges.push([0, 4]);
+    cube.edges.push([1, 5]);
+    cube.edges.push([2, 6]);
+    cube.edges.push([3, 7]);
 
-    drawScene();
     return cube;
 }
 
