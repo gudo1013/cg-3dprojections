@@ -165,6 +165,7 @@ function Mat4x4RotateX(mat4x4, theta){
 
 // set values of existing 4x4 matrix to the rotate about y-axis matrix
 function Mat4x4RotateY(mat4x4, theta) {
+    let rad = theta * Math.PI / 180; //convert to radians
     mat4x4.values = [[Math.cos(rad), 0, Math.sin(rad), 0],
                     [0, 1, 0, 0],
                     [-Math.sin(rad), 0, Math.cos(rad), 0],
@@ -173,6 +174,7 @@ function Mat4x4RotateY(mat4x4, theta) {
 
 // set values of existing 4x4 matrix to the rotate about z-axis matrix
 function Mat4x4RotateZ(mat4x4, theta) {
+    let rad = theta * Math.PI / 180; //convert to radians
     mat4x4.values = [[Math.cos(rad), -Math.sin(rad), 0, 0],
                     [Math.sin(rad), Math.cos(rad), 0, 0], 
                     [0, 0, 1, 0],

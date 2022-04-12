@@ -23,13 +23,13 @@ function init() {
 
     
         //Perspective House:
-        /*
+        
          scene = {
              view: {
                  type: 'perspective',
                  prp: Vector3(0, 10, -5),
                  srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
-                 vup: Vector3(1, 1, 0),
+                 vup: Vector3(1, 0, 0),
                  clip: [-12, 6, -12, 6, 10, 100]
                 
              },
@@ -59,16 +59,20 @@ function init() {
                      ],
                      animation: {
                          axis: 'x',
-                         rps: .5
+                         rps: .33
                      },
                      matrix: new Matrix(4, 4)
-                 }/*,
+                 },
                  {
                     type: "cube",
                     center: [-15, 15, -50],
                     width: 10,
                     height: 10,
-                    depth: 10
+                    depth: 10,
+                    animation: {
+                        axis: "z",
+                        rps: .3
+                    }
                 },
                 {
                     type: "cone",
@@ -78,7 +82,7 @@ function init() {
                     sides: 20,
                     animation: {
                         axis: "y",
-                        rps: 0.5
+                        rps: .5
                     }
                 },
                 {
@@ -89,17 +93,17 @@ function init() {
                     sides: 20,
                     animation: {
                         axis: "y",
-                        rps: 0.5
+                        rps: .25
                     }
                 }
              ]
             
             
      };
-     */
+     
      
 
-
+     /*
     //Parallel House
      scene = {
          view: {
@@ -141,8 +145,9 @@ function init() {
              }
          ]
        
-       
+      
  };
+ */
  
 
     // Ensure prp, srp, and vup are all vectors
@@ -151,13 +156,38 @@ function init() {
         scene.view.srp = new Vector3(scene.view.srp[0], scene.view.srp[1], scene.view.srp[2]);
         scene.view.vup = new Vector3(scene.view.vup[0], scene.view.vup[1], scene.view.vup[2]);
     }
+
+    // Ensure each model has a matrix
+    for(let i = 0; i < scene.models.length; i++){
+        if(scene.models[i].matrix == undefined){
+            scene.models[i].matrix = new Matrix(4, 4);
+        }
+    }
+
+    // Rotation matrix for the animation
+    for(let i = 0; i < scene.models.length; i++){
+        scene.models[i].rotatemat = new Matrix(4, 4);
+    }
+
+    // Calculate models
+    for(let i = 0; i < scene.models.length; i++){
+        if(scene.models[i].type == "cube"){
+            scene.models[i] = drawCube(scene.models[i]);
+        }
+        if(scene.models[i].type == "cone"){
+            scene.models[i] = drawCone(scene.models[i]);
+        }
+        if(scene.models[i].type == "cylinder"){
+            scene.models[i] = drawCylinder(scene.models[i]);
+        }
+    }
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
 
     let displayRate = 7 * (1/this.rps);
     // start animation loop
     start_time = performance.now(); // current timestamp in milliseconds
-    animate(performance.now());
+    animate(start_time);
     //drawScene();
 }
 
@@ -175,24 +205,26 @@ function animate(timestamp) {
 
     //console.log(seconds);
     // step 2: transform models based on time
-    let rotatemat = new Matrix(4,4);
+    
+    
     for(let i = 0; i < scene.models.length; i++){
+        let rotatemat = new Matrix(4,4);
         if (scene.models[i].animation != undefined){
-            let theta = 1//scene.models[i].animation.rps * 6;
-            for(let j = 0; j < scene.models[i].vertices.length; j++){
-                switch(scene.models[i].animation.axis){
-                    case 'x': 
-                        Mat4x4RotateX(rotatemat, theta);
-                        break;
-                    case 'y':
-                        Mat4x4RotateY(rotatemat, theta);
-                        break;
-                    case 'z':sw
-                        Mat4x4RotateZ(rotatemat, theta);
-                        break;
-                }
-                scene.models[i].vertices[j] = new Vector(rotatemat.mult(scene.models[i].vertices[j]));
+            let fullrotate = 1000 / scene.models[i].animation.rps
+            let theta = 360 * ((time%fullrotate)/fullrotate);
+            switch(scene.models[i].animation.axis){
+                case 'x': 
+                    Mat4x4RotateX(rotatemat, theta);
+                    break;
+                case 'y':
+                    Mat4x4RotateY(rotatemat, theta);
+                    break;
+                case 'z':
+                    Mat4x4RotateZ(rotatemat, theta);
+                    break;
             }
+            scene.models[i].rotatemat = rotatemat;
+            //console.log(scene.models[i])
         }
     }
     
@@ -206,7 +238,7 @@ function animate(timestamp) {
     //window.requestAnimationFrame(animate);
 
     // setTimeout(() => {
-    //     window.requestAnimationFrame(animate);
+         window.requestAnimationFrame(animate);
     // }, this.displayRate);
 
     //console.log("Testing");
@@ -229,24 +261,9 @@ function drawScene() {
     //  * project to 2D
     //  * draw line
 
-    //Draw all scene models necessary.
-    /*
-    for(let i = 0; i < scene.models.length; i++){
-        if(scene.models[i].type == "cube"){
-            scene.models[i] = drawCube(scene.models[i]);
-        }
-        if(scene.models[i].type == "cone"){
-            scene.models[i] = drawCone(scene.models[i]);
-        }
-        if(scene.models[i].type == "cylinder"){
-            scene.models[i] = drawCylinder(scene.models[i]);
-        }
-        console.log(i);
-    }
-    */
-
     // Loop through all models
     for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
+        
         if (scene.view.type == 'perspective') {
 
             // z_min = near/far (from scene clip)
@@ -266,10 +283,15 @@ function drawScene() {
 
             // Get the perspective Nper matrix
             let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
-
+            // Rotate the vertices based on animation
+            if(scene.models[modelnum].animation != undefined){
+                console.log(scene.models[modelnum].rotatemat);
+                transformmat = Matrix.multiply([transformmat, scene.models[modelnum].rotatemat]);
+            }
             // Create a copy of the vertices from the scene so as not to change the original vertices
             let newvertices = [];
             
+        
             // Transform each of the vertices using Nper, ensuring that they are in Vector format
             for (let i = 0; i < scene.models[modelnum].vertices.length; i++) {
                 newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
@@ -472,9 +494,6 @@ function clipLineParallel(line) {
         // Loop until trivial accept, if the line is already entirely in the view plane, skip the loop
         result = line;
 
-        console.log('out0 ' + out0);
-        console.log('out1 ' + out1);
-
         // This is purely for a bug that happens when clipping: occasionally will have an infinite loop and can't figure out the reason.
         let i = 0;
         // Loop ends once the OR of the outcodes equals 0, meaning that they both are in the viewspace
@@ -487,27 +506,27 @@ function clipLineParallel(line) {
             // Check for first point being outside
             if (out0 != 0) {
                 //For the first outcode that it comes across, calculate the corresponding t value
-                if ((out1 & LEFT) >= 1) {
-                    t = (-1 - p0.x) / (p0.x - p1.x);
+                if ((out0 & LEFT) >= 1) {
+                    t = (-1 - p0.x) / (-p0.x + p1.x);
                 }
-                else if ((out1 & RIGHT) >= 1) {
-                    t = (1 - p0.x) / (p0.x - p1.x);
+                else if ((out0 & RIGHT) >= 1) {
+                    t = (1 - p0.x) / (-p0.x + p1.x);
                 }
-                else if ((out1 & BOTTOM) >= 1) {
-                    t = (-1 - p0.y) / (p0.y - p1.y);
+                else if ((out0 & BOTTOM) >= 1) {
+                    t = (-1 - p0.y) / (-p0.y + p1.y);
                 }
-                else if ((out1 & TOP) >= 1) {
-                    t = (1 - p0.y) / (p0.y - p1.y);
+                else if ((out0 & TOP) >= 1) {
+                    t = (1 - p0.y) / (-p0.y + p1.y);
                 }
-                else if ((out1 & FAR )>= 1) {
-                    t = (-1 - p0.z) / (p0.z - p1.z);
+                else if ((out0 & FAR ) >= 1) {
+                    t = (-1 - p0.z) / (-p0.z + p1.z);
                 }
                 else { // NEAR
-                    t = (0 - p0.z) / (p0.z - p1.z);
+                    t = (-p0.z) / (-p0.z + p1.z);
                 }
 
                 // Use the parametric line equations to update coordinates using the calculated t value
-                //console.log("t = " + t);
+                
                 p0.x = ((1 - t) * p0.x) + (t * p1.x);
                 p0.y = ((1 - t) * p0.y) + (t * p1.y);
                 p0.z = ((1 - t) * p0.z) + (t * p1.z);
@@ -521,22 +540,23 @@ function clipLineParallel(line) {
                 // For the first outcode that it comes across, calculate the corresponding t value
                 // Outcode is bitwise AND with each bit representation
                 if ((out1 & LEFT) >= 1) {
-                    t = (-1 - p1.x) / (p1.x - p0.x);
+                    t = (-1 - p1.x) / (-p1.x + p0.x);
                 }
                 else if ((out1 & RIGHT) >= 1) {
-                    t = (1 - p1.x) / (p1.x - p0.x);
+                    t = (1 - p1.x) / (-p1.x + p0.x);
+                    
                 }
                 else if ((out1 & BOTTOM) >= 1) {
-                    t = (-1 - p1.y) / (p1.y - p0.y);
-                }
+                    t = (-1 - p1.y) / (-p1.y + p0.y);
+                } 
                 else if ((out1 & TOP) >= 1) {
-                    t = (1 - p1.y) / (p1.y - p0.y);
+                    t = (1 - p1.y) / (-p1.y + p0.y);
                 }
-                else if ((out1 & FAR )>= 1) {
-                    t = (-1 - p1.z) / (p1.z - p0.z);
+                else if ((out1 & FAR ) >= 1) {
+                    t = (-1 - p1.z) / (-p1.z + p0.z);
                 }
                 else { // NEAR
-                    t = (0 - p1.z) / (p1.z - p0.z);
+                    t = (-p1.z) / (-p1.z + p0.z);
                 }
 
                 //Use the parametric line equations to update coordinates using the calculated t value
@@ -836,6 +856,10 @@ function drawCube(modelCube){
     cube.edges.push([2, 6]);
     cube.edges.push([3, 7]);
 
+    if(modelCube.animation != undefined){
+        cube.animation = modelCube.animation;
+    }
+
     return cube;
 }
 
@@ -872,6 +896,10 @@ function drawCone(modelCone){
         if(i == sides){
             cone.edges.push([i, 1]);
         }
+    }
+
+    if(modelCone.animation != undefined){
+        cone.animation = modelCone.animation;
     }
 
     return cone;
@@ -931,6 +959,10 @@ function drawCylinder(modelCylinder){
 
     for(var i=0; i < sides; i++){
         cylinder.edges.push([i, i+sides]);
+    }
+
+    if(modelCylinder.animation != undefined){
+        cylinder.animation = modelCylinder.animation;
     }
 
     return cylinder;
