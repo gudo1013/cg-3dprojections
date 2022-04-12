@@ -80,17 +80,17 @@ function init() {
                         rps: 0.5
                     }
                 },
-                // {
-                //     type: "cylinder",
-                //     center: [12, 10, -49],
-                //     radius: 2,
-                //     height: 5,
-                //     sides: 12,
-                //     animation: {
-                //         "axis": "y",
-                //         "rps": 0.5
-                //     }
-                // }
+                {
+                    type: "cylinder",
+                    center: [-5, 30, -49],
+                    radius: 4,
+                    height: 20,
+                    sides: 20,
+                    animation: {
+                        axis: "y",
+                        rps: 0.5
+                    }
+                }
              ]
             
             
@@ -238,7 +238,7 @@ function drawScene() {
 
     // Loop through all models
     for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
-        if (scene.view.type = 'perspective') {
+        if (scene.view.type == 'perspective') {
 
             // z_min = near/far (from scene clip)
             let z_min = scene.view.clip[4] / scene.view.clip[5];
@@ -253,7 +253,7 @@ function drawScene() {
 
             //-----------TRANSFORM-----------
 
-            console.log("This should run thrice");
+            console.log("Modelnum: " + modelnum);
 
             // Get the perspective Nper matrix
             let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
@@ -819,7 +819,7 @@ function drawLine(x1, y1, x2, y2) {
     console.log("Loopdiedo");
 }
 
-
+//Generic function that creates the requirements for each model
 function generic() {
     return {
     type: "generic",
@@ -829,6 +829,8 @@ function generic() {
     }
 }
 
+//Draws a cube, based on the inputs, and pushes all vertices and edges
+//to create the cube, and returns.
 function drawCube(modelCube){
     var cube = generic();
     var center = modelCube.center;
@@ -856,7 +858,8 @@ function drawCube(modelCube){
     return cube;
 }
 
-
+//Draws a cone, with the given inputs, and pushes the top vertice first, then all
+//the following vertices on the base, or the circle of the cone.
 function drawCone(modelCone){
     var cone = generic();
     var center = modelCone.base;
@@ -875,7 +878,7 @@ function drawCone(modelCone){
 
     cone.edges.push(0, 1);
 
-    for(var i=1; i<=sides; i++) {
+    for(var i=2; i<=sides; i++) {
         var phi = this.toRadians((360/sides)*i)
         var x0 = center[0] + (radius * Math.cos(phi));
         var z0 = center[2] + (radius * Math.sin(phi));
@@ -894,6 +897,9 @@ function drawCone(modelCone){
 }
 
 
+
+//Creates a cylinder generic, makes the bottom and top circles, and then
+//connects all the points together.
 function drawCylinder(modelCylinder){
     var cylinder = generic();
     var center = modelCylinder.center;
@@ -902,12 +908,6 @@ function drawCylinder(modelCylinder){
     var sides = modelCylinder.sides;
 
 
-    var phi = this.toRadians((360/sides)* 0);
-    var x0 = center[0] + (radius * Math.cos(phi));
-    var z0 = center[2] + (radius * Math.sin(phi));
-
-    cylinder.vertices.push(Vector4(x0, center[1], z0, 1));
-
     for(var i=1; i<=sides; i++) {
         var phi = this.toRadians((360/sides)*i);
         var x0 = center[0] + (radius * Math.cos(phi));
@@ -915,15 +915,48 @@ function drawCylinder(modelCylinder){
 
         cylinder.vertices.push(Vector4(x0, center[1], z0, 1));
 
-        cylinder.edges.push([0, i]);
-        console.log("Cylinder ran!");
-        if(i == sides){
-            cylinder.edges.push([i, 0]);
+        if(i == 1){
+
+        } else if(i == sides){
+            cylinder.edges.push([(i-1), 0]);
+            cylinder.edges.push([(i-2), (i-1)]);
+        } else{
+            cylinder.edges.push([(i-2), (i-1)]);
         }
+
+        console.log("Cylinder ran!");
+        
     }
+
+    for(var i=1; i<=sides; i++) {
+        var phi = this.toRadians((360/sides)*i);
+        var x0 = center[0] + (radius * Math.cos(phi));
+        var z0 = center[2] + (radius * Math.sin(phi));
+
+        cylinder.vertices.push(Vector4(x0, center[1] + height, z0, 1));
+
+        if(i == 1){
+
+        } else if(i == sides){
+            cylinder.edges.push([(sides + i-1), sides]);
+            cylinder.edges.push([(sides + i-2), (sides + i-1)]);
+        } else{
+            cylinder.edges.push([(sides + i-2), (sides +i-1)]);
+        }
+
+        console.log("Cylinder ran!");
+        
+    }
+
+    for(var i=0; i < sides; i++){
+        cylinder.edges.push([i, i+sides]);
+    }
+
+    return cylinder;
 }
 
 
+//Takes degrees and outputs radians.
 function toRadians(degrees){
     return degrees* Math.PI/180;
 }
