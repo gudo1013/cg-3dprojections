@@ -64,42 +64,42 @@ function init() {
                      },
                      matrix: new Matrix(4, 4)
                  },
-                //  {
-                //     type: "cube",
-                //     center: [-15, 15, -50],
-                //     width: 10,
-                //     height: 10,
-                //     depth: 10,
-                //     animation: {
-                //         axis: "z",
-                //         rps: .3
-                //     }
-                // },
-                // {
-                //     type: "cone",
-                //     base: [-18, 25, -49],
-                //     radius: 5,
-                //     height: 10,
-                //     sides: 10,
-                //     animation: {
-                //         axis: "y",
-                //         rps: .5
-                //     }
-                // },
-                // {
-                //     type: "cylinder",
-                //     center: [-5, 30, -49],
-                //     radius: 4,
-                //     height: 20,
-                //     sides: 50,
-                //     animation: {
-                //         axis: "y",
-                //         rps: .25
-                //     }
-                // },
+                 {
+                    type: "cube",
+                    center: [-15, 15, -50],
+                    width: 10,
+                    height: 10,
+                    depth: 10,
+                    animation: {
+                        axis: "z",
+                        rps: .3
+                    }
+                },
+                {
+                    type: "cone",
+                    base: [-18, 25, -49],
+                    radius: 5,
+                    height: 10,
+                    sides: 50,
+                    animation: {
+                        axis: "y",
+                        rps: .5
+                    }
+                },
+                {
+                    type: "cylinder",
+                    center: [-5, 30, -49],
+                    radius: 4,
+                    height: 20,
+                    sides: 50,
+                    animation: {
+                        axis: "y",
+                        rps: .25
+                    }
+                },
                 {
                     type: "sphere",
-                    center: [-5, 20, -30],
+                    center: [15, 40, -50],
                     radius: 10,
                     slices: 10,
                     stacks: 10,
@@ -992,8 +992,11 @@ function drawSphere(modelSphere){
     var radius = modelSphere.radius;
     var slices = modelSphere.slices;
     var stacks = modelSphere.stacks;
+
+    //Creating the amount of sides for each circle in the sphere
     var side = 25;
 
+    //Creating new radius
     var newRadius = 0;
 
     //Y values for longitude
@@ -1006,9 +1009,12 @@ function drawSphere(modelSphere){
     var xValueUp = center[0] - 1; 
     var xValueDown = center[0] + 1;
 
+    //Squaring the original radius to calculate the new radius
     var sqRadius =  radius * radius;
 
+    //Increments for the edges in each segment of the circle
     var edgeInc = 0;
+    //Increment for the edges of each new part of the sphere
     var newLoopInc = 0;
 
 
@@ -1018,7 +1024,7 @@ function drawSphere(modelSphere){
 
         for(var j=1; j <= side; j++){
 
-          newRadius = Math.sqrt((sqRadius - ((yValueUp - center[1])*(yValueUp - center[1])))) + center[0];
+          newRadius = Math.sqrt((sqRadius - ((yValueUp - center[1])*(yValueUp - center[1]))));// + center[0];
 
           var phi = this.toRadians((360/side)*j);
            var x0 = center[0] + (newRadius * Math.cos(phi));
@@ -1050,7 +1056,7 @@ function drawSphere(modelSphere){
 
         for(var j=1; j <= side; j++){
 
-          newRadius = Math.sqrt((sqRadius - ((yValueDown - center[1])*(yValueDown - center[1])))) + center[0];
+          newRadius = Math.sqrt((sqRadius - ((yValueDown - center[1])*(yValueDown - center[1]))));// + center[0];
 
           var phi = this.toRadians((360/side)*j);
            var x0 = center[0] + (newRadius * Math.cos(phi));
@@ -1085,7 +1091,7 @@ function drawSphere(modelSphere){
 
         for(var j=1; j <= side; j++){
 
-          newRadius = Math.sqrt((sqRadius - ((xValueUp - center[0])*(xValueUp - center[0])))) + center[0];
+          newRadius = Math.sqrt((sqRadius - ((xValueUp - center[0])*(xValueUp - center[0]))));// + center[0];
 
            var phi = this.toRadians((360/side)*j);
            var y0 = center[1] + (newRadius * Math.cos(phi));
@@ -1117,7 +1123,7 @@ function drawSphere(modelSphere){
 
         for(var j=1; j <= side; j++){
 
-          newRadius = Math.sqrt((sqRadius - ((xValueDown - center[0])*(xValueDown - center[0])))) + center[0];
+          newRadius = Math.sqrt((sqRadius - ((xValueDown - center[0])*(xValueDown - center[0]))));// + center[0];
 
            var phi = this.toRadians((360/side)*j);
            var y0 = center[1] + (newRadius * Math.cos(phi));
@@ -1135,9 +1141,8 @@ function drawSphere(modelSphere){
           } else{
                 sphere.edges.push([(newLoopInc + edgeInc + j-2), (newLoopInc + edgeInc + j-1)]);
             }
-            
 
-            console.log("Sphere ran 3");
+            console.log("Sphere ran 4");
         }
     }
 
@@ -1153,22 +1158,22 @@ function toRadians(degrees){
 }
 
 //This draws a circle with a given center, radius, and the amount of sides on the x y plane
-function drawCircle(center, radius, sides) {
-    for(var i=1; i<=sides; i++) {
-         var phi = this.toRadians((360/sides)*i)
-         var x0 = center.x + (radius * Math.cos(phi));
-         var z0 = center.z + (radius * Math.sin(phi));
+// function drawCircle(center, radius, sides) {
+//     for(var i=1; i<=sides; i++) {
+//          var phi = this.toRadians((360/sides)*i)
+//          var x0 = center.x + (radius * Math.cos(phi));
+//          var z0 = center.z + (radius * Math.sin(phi));
 
-         var phi = this.toRadians((360/sides)*(i+1))
+//          var phi = this.toRadians((360/sides)*(i+1))
 
-         var x1 = center.x + (radius * Math.cos(phi));
-         var z1 = center.z + (radius * Math.sin(phi));
+//          var x1 = center.x + (radius * Math.cos(phi));
+//          var z1 = center.z + (radius * Math.sin(phi));
 
-         var p0 = new Point(x0, y0);
-         var p1 = new Point(x1, y1);
+//          var p0 = new Point(x0, y0);
+//          var p1 = new Point(x1, y1);
 
 
-         this.drawLine(p0.x, p0.y, p1.x, p1.y);
+//          this.drawLine(p0.x, p0.y, p1.x, p1.y);
          
-    }
-}
+//     }
+// }
