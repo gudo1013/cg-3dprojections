@@ -27,11 +27,19 @@ function init() {
         
          scene = {
              view: {
+                 
                  type: 'perspective',
                  prp: Vector3(0, 10, -5),
                  srp: Vector3(20, 15, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
-                 vup: Vector3(1, 0, 0),
+                 vup: Vector3(0, 1, 0),
                  clip: [-12, 6, -12, 6, 10, 100]
+                /*
+                 type: "parallel",
+                 prp: [0, 0, 10],
+                 srp: [1, 0, 0],
+                 vup: [0, 1, 0],
+                 clip: [-4, 50, -1, 50, 5, 75]
+                 */
                 
              },
              models: [
@@ -59,11 +67,12 @@ function init() {
                          [4, 9]
                      ],
                      animation: {
-                         axis: 'x',
+                         axis: 'z',
                          rps: .33
                      },
                      matrix: new Matrix(4, 4)
                  },
+                 /*
                  {
                     type: "cube",
                     center: [-15, 15, -50],
@@ -97,6 +106,7 @@ function init() {
                         rps: .25
                     }
                 }
+                */
              ]
             
             
@@ -170,18 +180,7 @@ function init() {
         scene.models[i].rotatemat = new Matrix(4, 4);
     }
 
-    // Calculate models
-    for(let i = 0; i < scene.models.length; i++){
-        if(scene.models[i].type == "cube"){
-            scene.models[i] = drawCube(scene.models[i]);
-        }
-        if(scene.models[i].type == "cone"){
-            scene.models[i] = drawCone(scene.models[i]);
-        }
-        if(scene.models[i].type == "cylinder"){
-            scene.models[i] = drawCylinder(scene.models[i]);
-        }
-    }
+    
     // event handler for pressing arrow keys
     document.addEventListener('keydown', onKeyDown, false);
 
@@ -207,7 +206,18 @@ function animate(timestamp) {
     //console.log(seconds);
     // step 2: transform models based on time
     
-    
+    // Calculate models
+    for(let i = 0; i < scene.models.length; i++){
+        if(scene.models[i].type == "cube"){
+            scene.models[i] = drawCube(scene.models[i]);
+        }
+        if(scene.models[i].type == "cone"){
+            scene.models[i] = drawCone(scene.models[i]);
+        }
+        if(scene.models[i].type == "cylinder"){
+            scene.models[i] = drawCylinder(scene.models[i]);
+        }
+    }
     for(let i = 0; i < scene.models.length; i++){
         let rotatemat = new Matrix(4,4);
         if (scene.models[i].animation != undefined){
@@ -239,7 +249,7 @@ function animate(timestamp) {
     //window.requestAnimationFrame(animate);
 
     // setTimeout(() => {
-         //window.requestAnimationFrame(animate);
+         window.requestAnimationFrame(animate);
     // }, this.displayRate);
 
     //console.log("Testing");
@@ -263,7 +273,6 @@ function drawScene() {
     //  * draw line
 
     let newsrp = rotateAxisV(vaxistheta, scene.view.prp, scene.view.srp, scene.view.vup);
-    console.log(newsrp);
     // Loop through all models
     for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
         
@@ -288,16 +297,20 @@ function drawScene() {
             // Get the perspective Nper matrix
             let transformmat = mat4x4Perspective(scene.view.prp, newsrp, scene.view.vup, scene.view.clip);
             // Rotate the vertices based on animation
-            if(scene.models[modelnum].animation != undefined){
-                transformmat = Matrix.multiply([transformmat, scene.models[modelnum].rotatemat]);
-            }
+            
             // Create a copy of the vertices from the scene so as not to change the original vertices
             let newvertices = [];
             
         
             // Transform each of the vertices using Nper, ensuring that they are in Vector format
             for (let i = 0; i < scene.models[modelnum].vertices.length; i++) {
-                newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
+                if(scene.models[modelnum].animation != undefined){
+                    newvertices[i] = new Vector(scene.models[modelnum].rotatemat.mult(scene.models[modelnum].vertices[i]));
+                    newvertices[i] = new Vector(transformmat.mult(newvertices[i]));
+                }
+                else{
+                    newvertices[i] = new Vector(transformmat.mult(scene.models[modelnum].vertices[i]));
+                }
             };
 
 
@@ -738,11 +751,11 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            vaxistheta = vaxistheta - 180;
+            vaxistheta = vaxistheta - 10;
             break;
         case 39: // RIGHT Arrow
             console.log("right");
-            vaxistheta = vaxistheta + 180;
+            vaxistheta = vaxistheta + 10;
             break;
         case 65: // A key
             console.log("A");
@@ -808,6 +821,7 @@ function loadNewScene() {
             scene.models[i].matrix = new Matrix(4, 4);
         }
     };
+    vaxistheta = 0;
     reader.readAsText(scene_file.files[0], 'UTF-8');
 }
 
