@@ -2,6 +2,7 @@ let view;
 let ctx;
 let scene;
 let start_time;
+let vaxistheta = 0;
 
 const LEFT = 32; // binary 100000
 const RIGHT = 16; // binary 010000
@@ -238,7 +239,7 @@ function animate(timestamp) {
     //window.requestAnimationFrame(animate);
 
     // setTimeout(() => {
-         window.requestAnimationFrame(animate);
+         //window.requestAnimationFrame(animate);
     // }, this.displayRate);
 
     //console.log("Testing");
@@ -261,6 +262,8 @@ function drawScene() {
     //  * project to 2D
     //  * draw line
 
+    let newsrp = rotateAxisV(vaxistheta, scene.view.prp, scene.view.srp, scene.view.vup);
+    console.log(newsrp);
     // Loop through all models
     for(let modelnum = 0; modelnum < scene.models.length; modelnum++){
         
@@ -280,12 +283,12 @@ function drawScene() {
             //-----------TRANSFORM-----------
 
             //console.log("Modelnum: " + modelnum);
+            
 
             // Get the perspective Nper matrix
-            let transformmat = mat4x4Perspective(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+            let transformmat = mat4x4Perspective(scene.view.prp, newsrp, scene.view.vup, scene.view.clip);
             // Rotate the vertices based on animation
             if(scene.models[modelnum].animation != undefined){
-                console.log(scene.models[modelnum].rotatemat);
                 transformmat = Matrix.multiply([transformmat, scene.models[modelnum].rotatemat]);
             }
             // Create a copy of the vertices from the scene so as not to change the original vertices
@@ -363,7 +366,7 @@ function drawScene() {
             //-----------TRANSFORM-----------
 
             // Get the perspective Nper matrix
-            let transformmat = mat4x4Parallel(scene.view.prp, scene.view.srp, scene.view.vup, scene.view.clip);
+            let transformmat = mat4x4Parallel(scene.view.prp, newsrp, scene.view.vup, scene.view.clip);
 
             // Create a copy of the vertices from the scene so as not to change the original vertices
             let newvertices = [];
@@ -735,11 +738,11 @@ function onKeyDown(event) {
     switch (event.keyCode) {
         case 37: // LEFT Arrow
             console.log("left");
-            scene.view.srp = rotateAxisV(-2, scene.view.prp, scene.view.srp, scene.view.vup);
+            vaxistheta = vaxistheta - 180;
             break;
         case 39: // RIGHT Arrow
             console.log("right");
-            scene.view.srp = rotateAxisV(2, scene.view.prp, scene.view.srp, scene.view.vup);
+            vaxistheta = vaxistheta + 180;
             break;
         case 65: // A key
             console.log("A");
@@ -750,7 +753,7 @@ function onKeyDown(event) {
             break;
         case 68: // D key
             console.log("D");
-            scene.view.prp.x = scene.view.prp.x - scene.view.vup.y;
+            scene.view.prp.x = (scene.view.prp.x - scene.view.vup.y);
             scene.view.prp.y = scene.view.prp.y + scene.view.vup.x;
             scene.view.srp.x = scene.view.srp.x - scene.view.vup.y;
             scene.view.srp.y = scene.view.srp.y + scene.view.vup.x;
@@ -759,6 +762,7 @@ function onKeyDown(event) {
             console.log("S");
             scene.view.prp.z = scene.view.prp.z + 1;
             scene.view.srp.z = scene.view.srp.z + 1;
+            console.log(scene.view.srp.z);
             break;
         case 87: // W key
             console.log("W");
