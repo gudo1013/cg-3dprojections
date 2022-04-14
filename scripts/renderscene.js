@@ -29,7 +29,7 @@ function init() {
              view: {
                  type: 'perspective',
                  prp: Vector3(0, 25, -5),
-                 srp: Vector3(10, 30, -49), //20, 15, -40 original, use -9, 15, -40 for clipping check
+                 srp: Vector3(10, 30, -49),
                  vup: Vector3(0, 1, 0),
                  clip: [-12, 6, -12, 6, 10, 100]
                 
@@ -266,7 +266,7 @@ function animate(timestamp) {
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
-    //console.log(scene);
+    console.log(scene);
 
     // Clear the previous drawn scene
     ctx.clearRect(0, 0, view.width, view.height)
@@ -768,12 +768,12 @@ function onKeyDown(event) {
         case 37: // LEFT Arrow
             //console.log("left");
             //scene.view.srp = rotateAxisV(-4, scene.view.prp, scene.view.srp, scene.view.vup);
-            vaxistheta = vaxistheta - 1;
+            vaxistheta = vaxistheta - 3;
             break;
         case 39: // RIGHT Arrow
             //console.log("right");
             //scene.view.srp = rotateAxisV(4, scene.view.prp, scene.view.srp, scene.view.vup);
-            vaxistheta = vaxistheta + 1;
+            vaxistheta = vaxistheta + 3;
             break;
         case 65: // A key
             //console.log("A");
@@ -839,6 +839,8 @@ function loadNewScene() {
             scene.models[i].rotatemat = new Matrix(4, 4);
             vaxistheta = 0;
         }
+        drawModels();
+        animate(performance.now());
     };
     reader.readAsText(scene_file.files[0], 'UTF-8');
     

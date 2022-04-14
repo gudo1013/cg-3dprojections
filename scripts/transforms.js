@@ -115,7 +115,7 @@ function rotateAxisV(theta, prp, srp, vup){
     u.normalize();
     //console.log(u);
     let v = n.cross(u);
-    console.log(v);
+    //console.log(v);
     theta = theta * (Math.PI/180);
     let mat = new Matrix(3,3);
 
@@ -124,7 +124,8 @@ function rotateAxisV(theta, prp, srp, vup){
                     [(v.z*v.x*(1-Math.cos(theta))) - (v.y*Math.sin(theta)), (v.z*v.y*(1-Math.cos(theta))) + (v.x*Math.sin(theta)), Math.cos(theta) + (Math.pow(v.z,2)*(1-Math.cos(theta))) ] ]
     
     let result = mat.mult(srp);
-    result = new Vector(result); 
+    result = new Vector(result);
+    //console.log(result.x)
     //console.log(result);
     return result;
 
