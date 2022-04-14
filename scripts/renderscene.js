@@ -177,7 +177,6 @@ function init() {
         }
     }
 
-    
 
     
     // event handler for pressing arrow keys
@@ -239,6 +238,7 @@ function animate(timestamp) {
                     Mat4x4RotateZ(rotatemat, theta);
                     break;
             }
+            
             scene.models[i].rotatemat = rotatemat;
             //console.log(scene.models[i])
         }
@@ -259,7 +259,7 @@ function animate(timestamp) {
 
 // Main drawing code - use information contained in variable `scene`
 function drawScene() {
-    console.log(scene);
+    //console.log(scene);
 
     // Clear the previous drawn scene
     ctx.clearRect(0, 0, view.width, view.height)
@@ -267,10 +267,7 @@ function drawScene() {
 
     
 
-    // Rotation matrix for the animation
-    for(let i = 0; i < scene.models.length; i++){
-        scene.models[i].rotatemat = new Matrix(4, 4);
-    }
+    
     // TODO: implement drawing here!
     // For each model, for each edge
     //  * transform to canonical view volume  - - - - - Believe this is completed for perspective
@@ -305,6 +302,7 @@ function drawScene() {
             let transformmat = mat4x4Perspective(scene.view.prp, newsrp, scene.view.vup, scene.view.clip);
             // Rotate the vertices based on animation
             if(scene.models[modelnum].animation != undefined){
+                //console.log(scene.models[modelnum].rotatemat)
                 transformmat = Matrix.multiply([transformmat, scene.models[modelnum].rotatemat]);
             }
             // Create a copy of the vertices from the scene so as not to change the original vertices
