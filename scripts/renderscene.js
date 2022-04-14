@@ -250,15 +250,8 @@ function animate(timestamp) {
 
 
     // step 4: request next animation frame (recursively calling same function)
-    // (may want to leave commented out while debugging initially)
-    //delayTime(rps);
-    //window.requestAnimationFrame(animate);
+    window.requestAnimationFrame(animate);
 
-    // setTimeout(() => {
-         //window.requestAnimationFrame(animate);
-    // }, this.displayRate);
-
-    //console.log("Testing");
 
 }
 
