@@ -109,10 +109,13 @@ function mat4x4MPer() {
 // rotate around v-axis
 function rotateAxisV(theta, prp, srp, vup){
     let n = prp.subtract(srp);
+    
     n.normalize();
     let u = vup.cross(n);
     u.normalize();
+    //console.log(u);
     let v = n.cross(u);
+    console.log(v);
     theta = theta * (Math.PI/180);
     let mat = new Matrix(3,3);
 
@@ -122,6 +125,7 @@ function rotateAxisV(theta, prp, srp, vup){
     
     let result = mat.mult(srp);
     result = new Vector(result); 
+    //console.log(result);
     return result;
 
 }
